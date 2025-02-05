@@ -8,6 +8,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CarrierController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\EmployeeLeadController;
@@ -16,15 +17,17 @@ use App\Http\Controllers\EmployeeFollowupController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\VendorController;
+use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
 // Public routes (no authentication required)
-Route::post('/login', [AuthController::class, 'login'])->name('login');
-
+Route::post('login', [AuthController::class, 'login'])->middleware('throttle:login');
 Route::post('/register', [AuthController::class, 'register']);
+Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show']);
 
 // Authenticated routes (must be logged in with Sanctum token)
 Route::middleware('auth:sanctum')->group(function () {
 
+    Route::get('/dashboard-data', [DashboardController::class, 'getDashboardData']);
     //Upload route
     Route::post('/upload', [FileUploadController::class, 'uploadFile']);
 

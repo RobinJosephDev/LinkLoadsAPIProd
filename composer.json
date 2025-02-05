@@ -13,6 +13,7 @@
         "laravel/sanctum": "^3.3",
         "laravel/scout": "^10.12",
         "laravel/tinker": "^2.8",
+        "pragmarx/google2fa": "^8.0",
         "predis/predis": "^2.2",
         "psr/http-client": "^1.0"
     },

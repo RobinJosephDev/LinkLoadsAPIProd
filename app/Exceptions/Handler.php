@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Exceptions;
-
+use Illuminate\Cache\RateLimiting\TooManyRequestsException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
@@ -45,4 +45,16 @@ class Handler extends ExceptionHandler
             //
         });
     }
+
+
+
+public function render($request, Throwable $exception)
+{
+    if ($exception instanceof TooManyRequestsException) {
+        return response()->json(['error' => 'Too many login attempts. Please try again later.'], 429);
+    }
+
+    return parent::render($request, $exception);
+}
+
 }
