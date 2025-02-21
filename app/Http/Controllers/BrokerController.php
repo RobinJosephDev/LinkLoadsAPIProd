@@ -17,7 +17,6 @@ class BrokerController extends Controller
 
     public function index()
     {
-        // Fetch all brokers
         return $this->broker->all();
     }
 

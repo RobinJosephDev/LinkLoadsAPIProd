@@ -10,22 +10,19 @@ class LeadController extends Controller
 {
     public function getCachedData()
     {
-        $value = Cache::get('key');
-
-        if (!$value) {
-            $value = 'default value';
-
-            Cache::put('key', $value, now()->addMinutes(10));
-        }
+        $value = Cache::remember('key', now()->addMinutes(10), function () {
+            return 'default value';
+        });
 
         return response()->json(['value' => $value]);
-    }  
+    }
+
 
     protected $lead;
 
-    public function __construct()
+    public function __construct(Lead $lead)
     {
-        $this->lead = new Lead();
+        $this->lead = $lead;
     }
 
     /**
@@ -33,8 +30,10 @@ class LeadController extends Controller
      */
     public function index()
     {
-        return $this->lead->all();
+        return response()->json(['data' => $this->lead->all()]);
     }
+
+
 
     /**
      * Store a newly created resource in storage.
@@ -109,9 +108,14 @@ class LeadController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+
+    public function show($id)
     {
-        return $this->lead->find($id);
+        if ($id === 'cached') {
+            return response()->json(['value' => Cache::get('key', 'default value')]);
+        }
+
+        return Lead::findOrFail($id);
     }
 
     /**
@@ -199,6 +203,13 @@ class LeadController extends Controller
     public function destroy(string $id)
     {
         $lead = $this->lead->find($id);
-        return $lead->delete();
+
+        if (!$lead) {
+            return response()->json(['error' => 'Lead not found'], 404);
+        }
+
+        $lead->delete();
+
+        return response()->json(['message' => 'Lead deleted successfully'], 200);
     }
 }

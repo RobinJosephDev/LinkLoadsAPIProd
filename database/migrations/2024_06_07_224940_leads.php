@@ -16,9 +16,9 @@ return new class extends Migration
             $table->integer("lead_no");
             $table->date("lead_date");
             $table->date("follow_up_date")->nullable();
-            $table->string("customer_name");
-            $table->bigInteger("phone");
-            $table->string("email");
+            $table->string("customer_name")->nullable();;
+            $table->bigInteger("phone")->nullable();;
+            $table->string("email")->nullable();;
             $table->string("website")->nullable();
             $table->string("equipment_type")->nullable();
             $table->string("address")->nullable();
@@ -27,9 +27,9 @@ return new class extends Migration
             $table->string("country")->nullable();
             $table->string("postal_code")->nullable();
             $table->integer("unit_no")->nullable();
-            $table->string("lead_type");
+            $table->string("lead_type")->nullable();;
             $table->string("contact_person")->nullable();
-            $table->string("lead_status");
+            $table->string("lead_status")->nullable();;
             $table->string("notes")->nullable();
             $table->json("contacts")->nullable();
             $table->timestamps();

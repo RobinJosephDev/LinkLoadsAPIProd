@@ -11,7 +11,7 @@ class LeadFollowup extends Model
 
     protected $table = 'lead_follow_up';
 
-    protected $primaryKey = 'id';  
+    protected $primaryKey = 'id';
 
     protected $fillable = [
         'lead_status',
@@ -39,5 +39,10 @@ class LeadFollowup extends Model
     public function lead()
     {
         return $this->belongsTo(Lead::class, 'lead_no'); // Ensure the foreign key matches the column in the database
+    }
+
+    public function getContactsAttribute($value)
+    {
+        return $value ? json_decode($value, true) : [];
     }
 }

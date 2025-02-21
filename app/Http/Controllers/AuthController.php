@@ -36,11 +36,13 @@ class AuthController extends Controller
                 'regex:/[@$!%*?&#^]/',  
             ],
             'role' => 'required|string|in:admin,employee,carrier,customer',
+            'emp_code' => 'nullable|string|unique:users,emp_code|max:255',
         ], [
             'password.regex' => 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.',
             'password.min' => 'Password must be at least 12 characters long.',
             'password.confirmed' => 'Password confirmation does not match.',
-        ]);
+        ],
+   );
     
         // Log the validated data to verify what is coming to the server
         Log::info('User registration data:', $validated);
@@ -53,6 +55,7 @@ class AuthController extends Controller
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),  // Hash password before storing
                 'role' => $validated['role'],
+                'emp_code' => $validated['emp_code'],
             ]);
     
             // Generate a new token for the user
