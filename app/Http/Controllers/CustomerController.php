@@ -19,8 +19,9 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        return response()->json($this->customer->all());
+        return response()->json($this->customer->orderBy('created_at', 'desc')->get());
     }
+
 
     /**
      * Store a newly created customer.
