@@ -18,10 +18,8 @@ class ShipmentController extends Controller
     // Get all shipments
     public function index()
     {
-        $shipments = Shipment::all();
-        return response()->json($shipments);
+        return response()->json($this->shipment->orderBy('created_at', 'desc')->get());
     }
-
     // Create a new shipment
     public function store(Request $request)
     {

@@ -17,12 +17,11 @@ class CarrierController extends Controller
 
     public function index()
     {
-        return $this->carrier->all();
+        return response()->json($this->carrier->orderBy('created_at', 'desc')->get());
     }
 
     public function store(Request $request)
     {
-
         $carrierData = $request->all();
 
         if ($request->hasFile('coi_cert')) {

@@ -31,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Upload route
     Route::post('/upload', [FileUploadController::class, 'uploadFile']);
+    Route::post('/carriers/{carrier}/upload', [CarrierController::class, 'uploadAgreement']);
 
     // Email route
     Route::post('/email', [EmailController::class, 'sendEmails']);

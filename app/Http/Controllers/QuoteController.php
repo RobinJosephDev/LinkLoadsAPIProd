@@ -14,11 +14,11 @@ class QuoteController extends Controller
     {
         $this->quote = new Quote();
     }
+
     // Show all quotes
     public function index()
     {
-        $quotes = Quote::all();
-        return response()->json($quotes);
+        return response()->json($this->quote->orderBy('created_at', 'desc')->get());
     }
 
     // Store a new quote

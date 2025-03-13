@@ -17,7 +17,6 @@ class LeadController extends Controller
         return response()->json(['value' => $value]);
     }
 
-
     protected $lead;
 
     public function __construct(Lead $lead)
@@ -30,10 +29,8 @@ class LeadController extends Controller
      */
     public function index()
     {
-        return response()->json(['data' => $this->lead->all()]);
+        return response()->json($this->lead->orderBy('created_at', 'desc')->get());
     }
-
-
 
     /**
      * Store a newly created resource in storage.

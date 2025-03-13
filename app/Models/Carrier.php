@@ -63,16 +63,16 @@ class Carrier extends Model
         'mailing_postal',
         'mailing_phone',
         'int_notes',
-        'contact',
-        'equipment',
-        'lane',
+        'contacts',
+        'equipments',
+        'lanes',
     ];
 
     // Casting fields as arrays or other types
     protected $casts = [
-        'contact' => 'array',
-        'equipment' => 'array',
-        'lane' => 'array',
+        'contacts' => 'array',
+        'equipments' => 'array',
+        'lanes' => 'array',
     ];
 
     public function contacts()

@@ -19,12 +19,9 @@ class OrderController extends Controller
      */
     public function index()
     {
-        return $this->order->all();
+        return response()->json($this->order->orderBy('created_at', 'desc')->get());
     }
 
-    /**
-     * Store newly created resources in storage (bulk insert).
-     */
     /**
      * Store newly created resources in storage (bulk insert).
      */

@@ -21,9 +21,9 @@ class LeadFollowupController extends Controller
      */
     public function index()
     {
-        return $this->lead_follow_up->all();
+        return response()->json($this->lead_follow_up->orderBy('created_at', 'desc')->get());
     }
-
+    
     /**
      * Store a newly created resource in storage.
      */

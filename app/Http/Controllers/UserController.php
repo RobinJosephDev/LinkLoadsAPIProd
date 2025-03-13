@@ -7,10 +7,18 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+
+    protected $user;
+
+    public function __construct()
+    {
+        $this->user = new User();
+    }
+
     // Get all users
     public function index()
     {
-        return response()->json(User::all());
+        return response()->json($this->user->orderBy('created_at', 'desc')->get());
     }
 
     // Get user by ID
@@ -35,4 +43,3 @@ class UserController extends Controller
         return response()->json(['message' => 'User deleted successfully']);
     }
 }
-
