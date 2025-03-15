@@ -10,7 +10,7 @@ use App\Http\Controllers\CarrierController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmailController;
-use App\Http\Controllers\FileUploadController;
+use App\Http\Controllers\FileTransferController;
 use App\Http\Controllers\EmployeeLeadController;
 use App\Http\Controllers\LeadFollowupController;
 use App\Http\Controllers\EmployeeFollowupController;
@@ -30,7 +30,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard-data', [DashboardController::class, 'getDashboardData']);
 
     // Upload route
-    Route::post('/upload', [FileUploadController::class, 'uploadFile']);
+    Route::post('/upload', [FileTransferController::class, 'uploadFile']);
+    Route::get('/download/{folder}/{filename}', [FileTransferController::class, 'downloadFile']);
+
     Route::post('/carriers/{carrier}/upload', [CarrierController::class, 'uploadAgreement']);
 
     // Email route
