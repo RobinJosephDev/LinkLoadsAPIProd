@@ -22,10 +22,10 @@ This is a **Laravel-powered web application** built to provide an elegant and ef
 
 ## 🛠️ Installation  
 
-### 1️⃣ Clone the Repository  
+1️⃣ Clone the Repository
 
-git clone https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME.git
-cd YOUR_REPO_NAME
+git clone https://github.com/RobinJosephDev/LinkLoadsAPI.git
+cd LinkLoadsAPI
 
 2️⃣ Install Dependencies
 
