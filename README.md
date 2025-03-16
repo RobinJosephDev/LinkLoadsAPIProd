@@ -19,6 +19,10 @@ This is a **Laravel-powered web application** built to provide an elegant and ef
 ✅ **Robust Background Job Processing**  
 ✅ **Real-Time Event Broadcasting**  
 
+🔗 **Frontend:** The backend powers the **React + TypeScript** admin panel.  
+👉 Check out the frontend repo here: [AdminUILinux](https://github.com/RobinJosephDev/AdminUILinux)  
+
+---
 
 ## 🛠️ Installation  
 
