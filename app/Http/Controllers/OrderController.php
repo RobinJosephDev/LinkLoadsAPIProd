@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class OrderController extends Controller
 {
@@ -14,147 +16,31 @@ class OrderController extends Controller
         $this->order = new Order();
     }
 
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
         return response()->json($this->order->orderBy('created_at', 'desc')->get());
     }
 
-    /**
-     * Store newly created resources in storage (bulk insert).
-     */
     public function store(Request $request)
     {
-        // Validate incoming data
-        $validatedData = $request->validate([
-            'customer' => 'required|string|max:255',
-            'customer_ref_no' => 'nullable|string|max:100',
-            'branch' => 'nullable|string|max:100',
-            'booked_by' => 'nullable|string|max:255',
-            'account_rep' => 'nullable|string|max:255',
-            'sales_rep' => 'nullable|string|max:255',
-            'customer_po_no' => 'nullable|string|max:100',
-            'commodity' => 'nullable|string|max:255',
-            'equipment' => 'nullable|string|max:255',
-            'load_type' => 'nullable|string|max:100',
-            'temperature' => 'nullable|numeric',
+        $validatedData = $this->validateOrder($request);
 
-            'origin_location' => 'nullable|array',
-            'origin_location.*.address' => 'nullable|string|max:255',
-            'origin_location.*.city' => 'nullable|string|max:255',
-            'origin_location.*.state' => 'nullable|string|max:255',
-            'origin_location.*.postal' => 'nullable|string|max:255',
-            'origin_location.*.country' => 'nullable|string|max:255',
-            'origin_location.*.date' => 'nullable|date',
-            'origin_location.*.time' => 'nullable|regex:/^\d{2}:\d{2}(:\d{2})?$/',
-            'origin_location.*.currency' => 'nullable|string|max:50',
-            'origin_location.*.equipment' => 'nullable|string|max:255',
-            'origin_location.*.pickup_po' => 'nullable|string|max:255',
-            'origin_location.*.phone' => 'nullable|string|max:50',
-            'origin_location.*.packages' => 'nullable|string|max:255',
-            'origin_location.*.weight' => 'nullable|string|max:255',
-            'origin_location.*.dimensions' => 'nullable|string|max:255',
-            'origin_location.*.notes' => 'nullable|string|max:255',
-
-            'destination_location' => 'nullable|array',
-            'destination_location.*.address' => 'nullable|string|max:255',
-            'destination_location.*.city' => 'nullable|string|max:255',
-            'destination_location.*.state' => 'nullable|string|max:255',
-            'destination_location.*.postal' => 'nullable|string|max:255',
-            'destination_location.*.country' => 'nullable|string|max:255',
-            'destination_location.*.date' => 'nullable|date',
-            'destination_location.*.time' => 'nullable|regex:/^\d{2}:\d{2}(:\d{2})?$/',
-            'destination_location.*.currency' => 'nullable|string|max:50',
-            'destination_location.*.equipment' => 'nullable|string|max:255',
-            'destination_location.*.pickup_po' => 'nullable|string|max:255',
-            'destination_location.*.phone' => 'nullable|string|max:50',
-            'destination_location.*.packages' => 'nullable|string|max:255',
-            'destination_location.*.weight' => 'nullable|string|max:255',
-            'destination_location.*.dimensions' => 'nullable|string|max:255',
-            'destination_location.*.notes' => 'nullable|string|max:255',
-
-            'hot' => 'nullable|boolean',
-            'team' => 'nullable|boolean',
-            'air_ride' => 'nullable|boolean',
-            'tarp' => 'nullable|boolean',
-            'hazmat' => 'nullable|boolean',
-            'currency' => 'nullable|string|max:10',
-            'base_price' => 'nullable|numeric',
-
-            'charges' => 'nullable|array',
-            'charges.*.type' => 'nullable|string|max:255',
-            'charges.*.charge' => 'nullable|numeric',
-            'charges.*.percent' => 'nullable|string|max:255',
-
-            'discounts' => 'nullable|array',
-            'discounts.*.type' => 'nullable|string|max:255',
-            'discounts.*.charge' => 'nullable|numeric',
-            'discounts.*.percent' => 'nullable|string|max:255',
-
-            'gst' => 'nullable|numeric',
-            'pst' => 'nullable|numeric',
-            'hst' => 'nullable|numeric',
-            'qst' => 'nullable|numeric',
-            'final_price' => 'nullable|numeric',
-            'notes' => 'nullable|string|max:500',
-        ]);
-
-        // Sanitize all fields
-        foreach ($validatedData as $key => &$value) {
-            if (is_string($value)) {
-                $value = trim($value); // Trim strings
-            } elseif (is_array($value)) {
-                foreach ($value as &$item) {
-                    if (is_array($item)) {
-                        foreach ($item as $subKey => &$subValue) {
-                            if (is_string($subValue)) {
-                                $subValue = trim($subValue); // Trim nested strings
-                            }
-                        }
-                    } elseif (is_string($item)) {
-                        $item = trim($item); // Trim strings in arrays
-                    }
-                }
-            } elseif (is_numeric($value)) {
-                $value = (float) $value; // Ensure numeric fields are cast properly
-            }
+        if ($validatedData->fails()) {
+            return response()->json(['errors' => $validatedData->errors()], 422);
         }
 
-        // Encode arrays into JSON for storage
-        if (isset($validatedData['origin_location']) && is_array($validatedData['origin_location'])) {
-            $validatedData['origin_location'] = json_encode($validatedData['origin_location']);
-        }
+        $orderData = $validatedData->validated();
+        $order = $this->order->create($orderData);
 
-        if (isset($validatedData['destination_location']) && is_array($validatedData['destination_location'])) {
-            $validatedData['destination_location'] = json_encode($validatedData['destination_location']);
-        }
-
-        if (isset($validatedData['charges']) && is_array($validatedData['charges'])) {
-            $validatedData['charges'] = json_encode($validatedData['charges']);
-        }
-
-        if (isset($validatedData['discounts']) && is_array($validatedData['discounts'])) {
-            $validatedData['discounts'] = json_encode($validatedData['discounts']);
-        }
-
-        // Save the order
-        return $this->order->create($validatedData);
+        return response()->json($order, 201);
     }
 
-
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         return $this->order->find($id);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         $order = $this->order->find($id);
@@ -163,119 +49,107 @@ class OrderController extends Controller
             return response()->json(['error' => 'Order not found'], 404);
         }
 
-        // Validate incoming data
-        $validatedData = $request->validate([
-            'customer' => 'required|string|max:255',
-            'customer_ref_no' => 'nullable|string|max:100',
-            'branch' => 'nullable|string|max:100',
-            'booked_by' => 'nullable|string|max:255',
-            'account_rep' => 'nullable|string|max:255',
-            'sales_rep' => 'nullable|string|max:255',
-            'customer_po_no' => 'nullable|string|max:100',
-            'commodity' => 'nullable|string|max:255',
-            'equipment' => 'nullable|string|max:255',
-            'load_type' => 'nullable|string|max:100',
-            'temperature' => 'nullable|numeric',
+        $validatedData = $this->validateOrder($request, $order->id);
 
-            'origin_location' => 'nullable|array',
-            'origin_location.*.address' => 'nullable|string|max:255',
-            'origin_location.*.city' => 'nullable|string|max:255',
-            'origin_location.*.state' => 'nullable|string|max:255',
-            'origin_location.*.postal' => 'nullable|string|max:255',
-            'origin_location.*.country' => 'nullable|string|max:255',
-            'origin_location.*.date' => 'nullable|date',
-            'origin_location.*.time' => 'nullable|regex:/^\d{2}:\d{2}(:\d{2})?$/',
-            'origin_location.*.currency' => 'nullable|string|max:50',
-            'origin_location.*.equipment' => 'nullable|string|max:255',
-            'origin_location.*.pickup_po' => 'nullable|string|max:255',
-            'origin_location.*.phone' => 'nullable|string|max:50',
-            'origin_location.*.packages' => 'nullable|string|max:255',
-            'origin_location.*.weight' => 'nullable|string|max:255',
-            'origin_location.*.dimensions' => 'nullable|string|max:255',
-            'origin_location.*.notes' => 'nullable|string|max:255',
-
-            'destination_location' => 'nullable|array',
-            'destination_location.*.address' => 'nullable|string|max:255',
-            'destination_location.*.city' => 'nullable|string|max:255',
-            'destination_location.*.state' => 'nullable|string|max:255',
-            'destination_location.*.postal' => 'nullable|string|max:255',
-            'destination_location.*.country' => 'nullable|string|max:255',
-            'destination_location.*.date' => 'nullable|date',
-            'destination_location.*.time' => 'nullable|regex:/^\d{2}:\d{2}(:\d{2})?$/',
-            'destination_location.*.currency' => 'nullable|string|max:50',
-            'destination_location.*.equipment' => 'nullable|string|max:255',
-            'destination_location.*.pickup_po' => 'nullable|string|max:255',
-            'destination_location.*.phone' => 'nullable|string|max:50',
-            'destination_location.*.packages' => 'nullable|string|max:255',
-            'destination_location.*.weight' => 'nullable|string|max:255',
-            'destination_location.*.dimensions' => 'nullable|string|max:255',
-            'destination_location.*.notes' => 'nullable|string|max:255',
-
-            'hot' => 'nullable|boolean',
-            'team' => 'nullable|string|max:255',
-            'air_ride' => 'nullable|boolean',
-            'tarp' => 'nullable|boolean',
-            'hazmat' => 'nullable|boolean',
-            'currency' => 'nullable|string|max:10',
-            'base_price' => 'nullable|numeric',
-            'charges' => 'nullable|array',
-            'discounts' => 'nullable|array',
-            'gst' => 'nullable|numeric',
-            'pst' => 'nullable|numeric',
-            'hst' => 'nullable|numeric',
-            'qst' => 'nullable|numeric',
-            'final_price' => 'nullable|numeric',
-            'notes' => 'nullable|string|max:500',
-        ]);
-
-        foreach ($validatedData as $key => &$value) {
-            if (is_string($value)) {
-                $value = trim($value); // Trim strings
-            } elseif (is_array($value)) {
-                foreach ($value as &$item) {
-                    if (is_array($item)) {
-                        foreach ($item as $subKey => &$subValue) {
-                            if (is_string($subValue)) {
-                                $subValue = trim($subValue); // Trim nested strings
-                            }
-                        }
-                    } elseif (is_string($item)) {
-                        $item = trim($item); // Trim strings in arrays
-                    }
-                }
-            } elseif (is_numeric($value)) {
-                $value = (float) $value; // Ensure numeric fields are cast properly
-            }
+        if ($validatedData->fails()) {
+            return response()->json(['errors' => $validatedData->errors()], 422);
         }
 
-        if (isset($validatedData['origin_location']) && is_array($validatedData['origin_location'])) {
-            $validatedData['origin_location'] = json_encode($validatedData['origin_location']);
-        }
-
-        if (isset($validatedData['destination_location']) && is_array($validatedData['destination_location'])) {
-            $validatedData['destination_location'] = json_encode($validatedData['destination_location']);
-        }
-
-        if (isset($validatedData['charges']) && is_array($validatedData['charges'])) {
-            $validatedData['charges'] = json_encode($validatedData['charges']);
-        }
-
-        if (isset($validatedData['discounts']) && is_array($validatedData['discounts'])) {
-            $validatedData['discounts'] = json_encode($validatedData['discounts']);
-        }
-
-        // Update the order
-        $order->update($validatedData);
+        $order->update($validatedData->validated());
 
         return response()->json($order);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         $order = $this->order->find($id);
         return $order->delete();
+    }
+
+    private function validateOrder(Request $request, $id = null)
+    {
+        return Validator::make($request->all(), [
+            // General
+            'customer' => 'required|string|min:1',
+            'customer_ref_no' => 'required|string|min:1',
+            'branch' => 'nullable|string|max:150|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
+            'booked_by' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
+            'account_rep' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
+            'sales_rep' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
+            'customer_po_no' => 'nullable|string|max:20|regex:/^[a-zA-Z0-9\-_\/]*$/',
+
+            // Shipment
+            'commodity' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
+            'equipment' => ['nullable', 'string', Rule::in(["Dry Van 53'", "Flat Bed 53'", "Reefer 53'"])],
+            'load_type' => ['nullable', 'string', Rule::in(['Partial', 'FTL', 'LTL'])],
+            'temperature' => 'nullable|numeric|min:-100|max:100',
+
+            // Origin Location
+            'origin_location' => 'nullable|array',
+            'origin_location.*.address' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
+            'origin_location.*.city' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
+            'origin_location.*.state' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
+            'origin_location.*.postal' => 'nullable|string|max:20|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
+            'origin_location.*.country' => 'nullable|string|max:100|regex:/^[a-zA-Z\s]*$/',
+            'origin_location.*.date' => 'nullable|date_format:Y-m-d',
+            'origin_location.*.time' => 'nullable|date_format:H:i',
+            'origin_location.*.currency' => 'nullable|string|size:3|regex:/^[A-Z]{3}$/',
+            'origin_location.*.equipment' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
+            'origin_location.*.pickup_po' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s\-]*$/',
+            'origin_location.*.phone' => 'nullable|string|max:30|regex:/^\+?[0-9\-()\s]*$/',
+            'origin_location.*.packages' => 'nullable|integer|min:1|max:99999',
+            'origin_location.*.weight' => 'nullable|numeric|min:0|max:1000000',
+            'origin_location.*.dimensions' => 'nullable|string|max:100|regex:/^\d+x\d+x\d+$/',
+            'origin_location.*.notes' => 'nullable|string|max:500|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
+
+            // Destination Location
+            'destination_location' => 'nullable|array',
+            'destination_location.*.address' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
+            'destination_location.*.city' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
+            'destination_location.*.state' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
+            'destination_location.*.postal' => 'nullable|string|max:20|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
+            'destination_location.*.country' => 'nullable|string|max:100|regex:/^[a-zA-Z\s]*$/',
+            'destination_location.*.date' => 'nullable|date_format:Y-m-d', 
+            'destination_location.*.time' => 'nullable|date_format:H:i',
+            'destination_location.*.currency' => 'nullable|string|size:3|regex:/^[A-Z]{3}$/',
+            'destination_location.*.equipment' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
+            'destination_location.*.pickup_po' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s\-]*$/',
+            'destination_location.*.phone' => 'nullable|string|max:30|regex:/^\+?[0-9\-()\s]*$/',
+            'destination_location.*.packages' => 'nullable|integer|min:1|max:99999',
+            'destination_location.*.weight' => 'nullable|numeric|min:0|max:1000000',
+            'destination_location.*.dimensions' => 'nullable|string|max:100|regex:/^\d+x\d+x\d+$/',
+            'destination_location.*.notes' => 'nullable|string|max:500|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
+
+            // Specs
+            'hot' => 'boolean',
+            'team' => 'boolean',
+            'air_ride' => 'boolean',
+            'tarp' => 'boolean',
+            'hazmat' => 'boolean',
+
+            // Revenue
+            'currency' => 'nullable|string|in:CAD,USD',
+            'base_price' => 'nullable|numeric|min:0|max:1000000',
+
+            // Charges
+            'charges' => 'nullable|array',
+            'charges.*.type' => 'nullable|string|max:200|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
+            'charges.*.charge' => 'nullable|numeric|min:0|max:1000000',
+            'charges.*.percent' => 'nullable|string|in:Flat,Percentage',
+
+            // Discounts
+            'discounts' => 'nullable|array',
+            'discounts.*.type' => 'nullable|string|max:200|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
+            'discounts.*.charge' => 'nullable|numeric|min:0|max:1000000',
+            'discounts.*.percent' => 'nullable|string|in:Flat,Percentage',
+
+            // Tax
+            'gst' => 'nullable|numeric|min:0|max:1000000',
+            'pst' => 'nullable|numeric|min:0|max:1000000',
+            'hst' => 'nullable|numeric|min:0|max:1000000',
+            'qst' => 'nullable|numeric|min:0|max:1000000',
+            'final_price' => 'nullable|numeric|min:0|max:1000000',
+            'notes' => 'nullable|string|max:500|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
+        ]);
     }
 }
