@@ -2,27 +2,133 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Carrier;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 class CarrierController extends Controller
 {
-    /**
-     * Display a listing of the carriers.
-     */
+    protected $carrier;
+
+    public function __construct()
+    {
+        $this->carrier = new Carrier();
+    }
+
     public function index()
     {
-        return response()->json(Carrier::all());
+        return response()->json($this->carrier->orderBy('created_at', 'desc')->get());
+    }
+
+    public function store(Request $request)
+    {
+        try {
+            // Validate request and get validator instance
+            $validator = $this->validateCarrier($request);
+
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            // Extract validated data as an array
+            $carrierData = $validator->validated();
+
+            // Decode JSON fields
+            $carrierData['contacts'] = is_string($carrierData['contacts']) ? json_decode($carrierData['contacts'], true) : $carrierData['contacts'];
+            $carrierData['equipments'] = is_string($carrierData['equipments']) ? json_decode($carrierData['equipments'], true) : $carrierData['equipments'];
+            $carrierData['lanes'] = is_string($carrierData['lanes']) ? json_decode($carrierData['lanes'], true) : $carrierData['lanes'];
+
+            // Handle file uploads
+            if ($request->hasFile('brok_carr_aggmt')) {
+                $carrierData['brok_carr_aggmt'] = $request->file('brok_carr_aggmt')->store('carrier_agreements', 'public');
+            }
+
+            if ($request->hasFile('coi_cert')) {
+                $carrierData['coi_cert'] = $request->file('coi_cert')->store('coi_certificates', 'public');
+            }
+
+            // Create the carrier
+            $carrier = Carrier::create($carrierData);
+
+            Log::info('Carrier Created:', $carrier->toArray());
+
+            return response()->json($carrier, 201);
+        } catch (\Exception $e) {
+            Log::error('Error storing carrier:', ['error' => $e->getMessage()]);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function show(string $id)
+    {
+        return $this->carrier->find($id);
+    }
+
+
+    public function update(Request $request, string $id)
+    {
+        try {
+            $carrier = $this->carrier->find($id);
+
+            if (!$carrier) {
+                return response()->json(['error' => 'Carrier not found'], 404);
+            }
+
+            $validatedData = $this->validateCarrier($request, $carrier->id);
+
+            if ($validatedData->fails()) {
+                return response()->json(['errors' => $validatedData->errors()], 422);
+            }
+
+            // Extract validated data as an array
+            $carrierData = $validatedData->validated();
+
+            // Decode JSON fields
+            $carrierData['contacts'] = is_string($carrierData['contacts']) ? json_decode($carrierData['contacts'], true) : $carrierData['contacts'];
+            $carrierData['equipments'] = is_string($carrierData['equipments']) ? json_decode($carrierData['equipments'], true) : $carrierData['equipments'];
+            $carrierData['lanes'] = is_string($carrierData['lanes']) ? json_decode($carrierData['lanes'], true) : $carrierData['lanes'];
+
+            // Handle file uploads
+            if ($request->hasFile('brok_carr_aggmt')) {
+                $carrierData['brok_carr_aggmt'] = $request->file('brok_carr_aggmt')->store('carrier_agreements', 'public');
+            }
+
+            if ($request->hasFile('coi_cert')) {
+                $carrierData['coi_cert'] = $request->file('coi_cert')->store('coi_certificates', 'public');
+            }
+
+            $carrier->update($validatedData->validated());
+
+            return response()->json($carrier);
+        } catch (\Exception $e) {
+            Log::error('Error updating carrier:', ['error' => $e->getMessage()]);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function destroy(string $id)
+    {
+        $carrier = $this->carrier->find($id);
+        if (!$carrier) {
+            return response()->json(['error' => 'Carrier not found'], 404);
+        }
+
+        $carrier->delete();
+        return response()->json(['message' => 'Carrier deleted successfully'], 200);
     }
 
     /**
-     * Store a newly created carrier in storage.
+     * Validate vendor input data.
      */
-    public function store(Request $request)
+    /**
+     * @var array $validator
+     */
+    private function validateCarrier(Request $request)
     {
-        $carrierData = $request->validate([
+        return Validator::make($request->all(), [
+
             //General
             'dba' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
             'legal_name' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
@@ -36,6 +142,7 @@ class CarrierController extends Controller
             'form_1099' => 'nullable|boolean',
             'advertise' => 'nullable|boolean',
             'advertise_email' => 'nullable|max:255|email',
+            'brok_carr_aggmt' => 'nullable|string',
 
             //Carrier Details
             'carr_type' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
@@ -50,7 +157,6 @@ class CarrierController extends Controller
             'csa_approved' => 'nullable|boolean',
             'hazmat' => 'nullable|boolean',
             'approved' => 'nullable|boolean',
-            'brok_carr_aggmt' => 'nullable|string',
 
             //Liability Insurance
             'li_provider' => 'nullable|string|max:150|regex:/^[a-zA-Z0-9\s.,\'-]*$/',
@@ -225,69 +331,5 @@ class CarrierController extends Controller
                 'WY'
             ])],
         ]);
-
-        if ($request->hasFile('coi_cert')) {
-            $carrierData['coi_cert'] = $request->file('coi_cert')->store('coi_cert', 'public');
-        }
-        if ($request->hasFile('brok_carr_aggmt')) {
-            $carrierData['brok_carr_aggmt'] = $request->file('brok_carr_aggmt')->store('brok_carr_aggmt', 'public');
-        }
-
-        $carrier = Carrier::create($carrierData);
-
-        return response()->json($carrier, 201);
-    }
-
-    /**
-     * Display the specified carrier.
-     */
-    public function show(Carrier $carrier)
-    {
-        return response()->json($carrier);
-    }
-
-    /**
-     * Update the specified carrier in storage.
-     */
-    public function update(Request $request, Carrier $carrier)
-    {
-        $carrierData = $request->validate([
-            // Validation rules here
-        ]);
-
-        if ($request->hasFile('coi_cert')) {
-            if ($carrier->coi_cert) {
-                Storage::delete('public/' . $carrier->coi_cert);
-            }
-            $carrierData['coi_cert'] = $request->file('coi_cert')->store('coi_cert', 'public');
-        }
-
-        if ($request->hasFile('brok_carr_aggmt')) {
-            if ($carrier->brok_carr_aggmt) {
-                Storage::delete('public/' . $carrier->brok_carr_aggmt);
-            }
-            $carrierData['brok_carr_aggmt'] = $request->file('brok_carr_aggmt')->store('brok_carr_aggmt', 'public');
-        }
-
-        $carrier->update($carrierData);
-
-        return response()->json($carrier);
-    }
-
-    /**
-     * Remove the specified carrier from storage.
-     */
-    public function destroy(Carrier $carrier)
-    {
-        if ($carrier->coi_cert) {
-            Storage::delete('public/' . $carrier->coi_cert);
-        }
-        if ($carrier->brok_carr_aggmt) {
-            Storage::delete('public/' . $carrier->brok_carr_aggmt);
-        }
-
-        $carrier->delete();
-
-        return response()->json(['message' => 'Carrier deleted successfully.']);
     }
 }
