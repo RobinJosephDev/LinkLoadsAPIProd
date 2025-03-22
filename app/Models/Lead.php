@@ -35,9 +35,12 @@ class Lead extends Model
         'contacts',
         'assigned_to'
     ];
+    protected $casts = [
+        'contacts' => 'array',
+    ];
     
     public function leadFollowups()
     {
-        return $this->hasMany(LeadFollowup::class, 'lead_no'); // Ensure this matches the foreign key
+        return $this->hasMany(LeadFollowup::class, 'lead_no');
     }
 }

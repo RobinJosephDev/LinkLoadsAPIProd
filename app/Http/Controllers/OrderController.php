@@ -70,8 +70,8 @@ class OrderController extends Controller
     {
         return Validator::make($request->all(), [
             // General
-            'customer' => 'required|string|min:1',
-            'customer_ref_no' => 'required|string|min:1',
+            'customer' => 'required|string|min:1|max:200|regex:/^[a-zA-Z0-9\s.,\'\-]+$/',
+            'customer_ref_no' => 'required|string|min:1|max:100|regex:/^[a-zA-Z0-9\s.,\'\-]+$/',
             'branch' => 'nullable|string|max:150|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
             'booked_by' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
             'account_rep' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
@@ -109,7 +109,7 @@ class OrderController extends Controller
             'destination_location.*.state' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
             'destination_location.*.postal' => 'nullable|string|max:20|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
             'destination_location.*.country' => 'nullable|string|max:100|regex:/^[a-zA-Z\s]*$/',
-            'destination_location.*.date' => 'nullable|date_format:Y-m-d', 
+            'destination_location.*.date' => 'nullable|date_format:Y-m-d',
             'destination_location.*.time' => 'nullable|date_format:H:i',
             'destination_location.*.currency' => 'nullable|string|size:3|regex:/^[A-Z]{3}$/',
             'destination_location.*.equipment' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',

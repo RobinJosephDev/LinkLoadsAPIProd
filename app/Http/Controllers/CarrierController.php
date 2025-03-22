@@ -130,8 +130,8 @@ class CarrierController extends Controller
         return Validator::make($request->all(), [
 
             //General
-            'dba' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
-            'legal_name' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
+            'dba' => 'required|string|max:100|regex:/^[a-zA-Z0-9\s,.\'\-]+$/',
+            'legal_name' => 'required|string|max:100|regex:/^[a-zA-Z0-9\s,.\'\-]+$/',
             'remit_name' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
             'acc_no' => 'nullable|string|max:50|regex:/^[a-zA-Z0-9-]*$/',
             'branch' => 'nullable|string|max:50|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',

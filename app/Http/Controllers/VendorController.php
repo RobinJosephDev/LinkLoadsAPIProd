@@ -95,10 +95,10 @@ class VendorController extends Controller
             'type' => 'required|string|in:Vendor,Factoring Company',
 
             //Vendor Details
-            'legal_name' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.,\'\-]*$/',
-            'remit_name' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.,\'\-]*$/',
-            'vendor_type' => 'nullable|string|max:50|regex:/^[a-zA-Z\s.,\'\-]*$/',
-            'service' => 'nullable|string|max:100|regex:/^[a-zA-Z\s.,\'\-]*$/',
+            'legal_name' => 'required|string|max:200|regex:/^[a-zA-Z\s.,\'\-]*$/',
+            'remit_name' => 'required|string|max:200|regex:/^[a-zA-Z\s.,\'\-]*$/',
+            'vendor_type' => 'required|string|max:50|regex:/^[a-zA-Z\s.,\'\-]*$/',
+            'service' => 'required|string|max:100|regex:/^[a-zA-Z\s.,\'\-]*$/',
             'scac' => 'nullable|string|max:10|regex:/^[a-zA-Z0-9-]*$/',
             'docket_number' => 'nullable|string|max:50|regex:/^[a-zA-Z0-9-]*$/',
             'vendor_code' => 'nullable|string|max:20|regex:/^[a-zA-Z\s0-9-]*$/',

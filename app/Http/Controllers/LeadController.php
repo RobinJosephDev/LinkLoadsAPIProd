@@ -4,24 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Lead;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Validator;
 
 class LeadController extends Controller
 {
-    public function getCachedData()
-    {
-        $value = Cache::remember('key', now()->addMinutes(10), function () {
-            return 'default value';
-        });
-
-        return response()->json(['value' => $value]);
-    }
 
     protected $lead;
 
-    public function __construct(Lead $lead)
+    public function __construct()
     {
-        $this->lead = $lead;
+        $this->lead = new Lead();
     }
 
     /**
@@ -37,82 +29,24 @@ class LeadController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate input data
-        $validatedData = $request->validate([
-            'lead_no' => 'required|string|max:50',
-            'lead_date' => 'required|nullable|date',
-            'customer_name' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:50',
-            'email' => 'nullable|email|max:255',
-            'website' => 'nullable|url|max:255',
-            'address' => 'nullable|string|max:255',
-            'unit_no' => 'nullable|string|max:50',
-            'city' => 'nullable|string|max:100',
-            'state' => 'nullable|string|max:100',
-            'country' => 'nullable|string|max:100',
-            'postal_code' => 'nullable|string|max:20',
-            'lead_type' => 'required|string|max:100',
-            'contact_person' => 'nullable|string|max:255',
-            'notes' => 'nullable|string|max:500',
-            'lead_status' => 'required|string|max:50',
-            'follow_up_date' => 'nullable|date',
-            'equipment_type' => 'nullable|string|max:100',
-            'assigned_to' => 'nullable|string|max:50',
-            'contacts' => 'nullable|array',
-            'contacts.*.name' => 'nullable|string|max:255',
-            'contacts.*.phone' => 'nullable|string|max:50',
-            'contacts.*.email' => 'nullable|email|max:255',
-        ]);
+        $validatedData = $this->validateLead($request);
 
-        // Sanitizing the validated data
-        $validatedData['lead_no'] = trim($validatedData['lead_no']);
-        $validatedData['customer_name'] = isset($validatedData['customer_name']) ? trim($validatedData['customer_name']) : null;
-        $validatedData['phone'] = isset($validatedData['phone']) ? trim($validatedData['phone']) : null;
-        $validatedData['email'] = isset($validatedData['email']) ? filter_var(trim($validatedData['email']), FILTER_SANITIZE_EMAIL) : null;
-        $validatedData['website'] = isset($validatedData['website']) ? filter_var(trim($validatedData['website']), FILTER_SANITIZE_URL) : null;
-        $validatedData['address'] = isset($validatedData['address']) ? trim($validatedData['address']) : null;
-        $validatedData['unit_no'] = isset($validatedData['unit_no']) ? trim($validatedData['unit_no']) : null;
-        $validatedData['city'] = isset($validatedData['city']) ? trim($validatedData['city']) : null;
-        $validatedData['state'] = isset($validatedData['state']) ? trim($validatedData['state']) : null;
-        $validatedData['country'] = isset($validatedData['country']) ? trim($validatedData['country']) : null;
-        $validatedData['postal_code'] = isset($validatedData['postal_code']) ? trim($validatedData['postal_code']) : null;
-        $validatedData['lead_type'] = trim($validatedData['lead_type']);
-        $validatedData['contact_person'] = isset($validatedData['contact_person']) ? trim($validatedData['contact_person']) : null;
-        $validatedData['notes'] = isset($validatedData['notes']) ? trim($validatedData['notes']) : null;
-        $validatedData['lead_status'] = trim($validatedData['lead_status']);
-        $validatedData['follow_up_date'] = isset($validatedData['follow_up_date']) ? trim($validatedData['follow_up_date']) : null;
-        $validatedData['equipment_type'] = isset($validatedData['equipment_type']) ? trim($validatedData['equipment_type']) : null;
-
-        // Sanitizing contacts array if present
-        if (isset($validatedData['contacts']) && is_array($validatedData['contacts'])) {
-            $validatedData['contacts'] = array_map(function ($contact) {
-                $contact['name'] = isset($contact['name']) ? trim($contact['name']) : null;
-                $contact['phone'] = isset($contact['phone']) ? trim($contact['phone']) : null;
-                $contact['email'] = isset($contact['email']) ? filter_var(trim($contact['email']), FILTER_SANITIZE_EMAIL) : null;
-                return $contact;
-            }, $validatedData['contacts']);
+        if ($validatedData->fails()) {
+            return response()->json(['errors' => $validatedData->errors()], 422);
         }
 
-        // Convert contacts array to JSON before storing
-        if (isset($validatedData['contacts'])) {
-            $validatedData['contacts'] = json_encode($validatedData['contacts']);
-        }
+        $leadData = $validatedData->validated();
+        $lead = $this->lead->create($leadData);
 
-        // Save the lead
-        return $this->lead->create($validatedData);
+        return response()->json($lead, 201);
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified lead.
      */
-
-    public function show($id)
+    public function show(string $id)
     {
-        if ($id === 'cached') {
-            return response()->json(['value' => Cache::get('key', 'default value')]);
-        }
-
-        return Lead::findOrFail($id);
+        return $this->lead->find($id);
     }
 
     /**
@@ -126,70 +60,13 @@ class LeadController extends Controller
             return response()->json(['error' => 'Lead not found'], 404);
         }
 
-        // Validate incoming data
-        $validatedData = $request->validate([
-            'lead_no' => 'required|string|max:50',
-            'lead_date' => 'required|date',
-            'customer_name' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:50',
-            'email' => 'nullable|email|max:255',
-            'website' => 'nullable|url|max:255',
-            'address' => 'nullable|string|max:255',
-            'unit_no' => 'nullable|string|max:50',
-            'city' => 'nullable|string|max:100',
-            'state' => 'nullable|string|max:100',
-            'country' => 'nullable|string|max:100',
-            'postal_code' => 'nullable|string|max:20',
-            'lead_type' => 'required|string|max:100',
-            'contact_person' => 'nullable|string|max:255',
-            'notes' => 'nullable|string|max:500',
-            'lead_status' => 'required|string|max:50',
-            'follow_up_date' => 'nullable|date',
-            'equipment_type' => 'nullable|string|max:100',
-            'assigned_to' => 'nullable|string|max:50',
-            'contacts' => 'nullable|array',
-            'contacts.*.name' => 'nullable|string|max:255',
-            'contacts.*.phone' => 'nullable|string|max:50',
-            'contacts.*.email' => 'nullable|email|max:255',
+        $validatedData = $this->validateLead($request, $lead->id);
 
-        ]);
-
-        // Sanitizing the validated data
-        $validatedData['lead_no'] = trim($validatedData['lead_no']);
-        $validatedData['customer_name'] = isset($validatedData['customer_name']) ? trim($validatedData['customer_name']) : null;
-        $validatedData['phone'] = isset($validatedData['phone']) ? trim($validatedData['phone']) : null;
-        $validatedData['email'] = isset($validatedData['email']) ? filter_var(trim($validatedData['email']), FILTER_SANITIZE_EMAIL) : null;
-        $validatedData['website'] = isset($validatedData['website']) ? filter_var(trim($validatedData['website']), FILTER_SANITIZE_URL) : null;
-        $validatedData['address'] = isset($validatedData['address']) ? trim($validatedData['address']) : null;
-        $validatedData['unit_no'] = isset($validatedData['unit_no']) ? trim($validatedData['unit_no']) : null;
-        $validatedData['city'] = isset($validatedData['city']) ? trim($validatedData['city']) : null;
-        $validatedData['state'] = isset($validatedData['state']) ? trim($validatedData['state']) : null;
-        $validatedData['country'] = isset($validatedData['country']) ? trim($validatedData['country']) : null;
-        $validatedData['postal_code'] = isset($validatedData['postal_code']) ? trim($validatedData['postal_code']) : null;
-        $validatedData['lead_type'] = trim($validatedData['lead_type']);
-        $validatedData['contact_person'] = isset($validatedData['contact_person']) ? trim($validatedData['contact_person']) : null;
-        $validatedData['notes'] = isset($validatedData['notes']) ? trim($validatedData['notes']) : null;
-        $validatedData['lead_status'] = trim($validatedData['lead_status']);
-        $validatedData['follow_up_date'] = isset($validatedData['follow_up_date']) ? trim($validatedData['follow_up_date']) : null;
-        $validatedData['equipment_type'] = isset($validatedData['equipment_type']) ? trim($validatedData['equipment_type']) : null;
-
-        // Sanitizing contacts array if present
-        if (isset($validatedData['contacts']) && is_array($validatedData['contacts'])) {
-            $validatedData['contacts'] = array_map(function ($contact) {
-                $contact['name'] = isset($contact['name']) ? trim($contact['name']) : null;
-                $contact['phone'] = isset($contact['phone']) ? trim($contact['phone']) : null;
-                $contact['email'] = isset($contact['email']) ? filter_var(trim($contact['email']), FILTER_SANITIZE_EMAIL) : null;
-                return $contact;
-            }, $validatedData['contacts']);
+        if ($validatedData->fails()) {
+            return response()->json(['errors' => $validatedData->errors()], 422);
         }
 
-        // Convert contacts array to JSON before storing
-        if (isset($validatedData['contacts'])) {
-            $validatedData['contacts'] = json_encode($validatedData['contacts']);
-        }
-
-        // Update the lead
-        $lead->update($validatedData);
+        $lead->update($validatedData->validated());
 
         return response()->json($lead);
     }
@@ -200,13 +77,51 @@ class LeadController extends Controller
     public function destroy(string $id)
     {
         $lead = $this->lead->find($id);
-
         if (!$lead) {
             return response()->json(['error' => 'Lead not found'], 404);
         }
 
         $lead->delete();
-
         return response()->json(['message' => 'Lead deleted successfully'], 200);
+    }
+
+    /**
+     * Validate lead input data.
+     */
+    private function validateLead(Request $request, $id = null)
+    {
+        return Validator::make($request->all(), [
+
+            //Lead Details
+            'lead_no' =>  'required|string|max:100|regex:/^[a-zA-Z0-9\s.,\'\-]+$/',
+            'lead_date' => 'required|date',
+            'customer_name' => 'nullable|string|max:200|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
+            'phone' => 'nullable|regex:/^[0-9\-\(\)\s]{0,30}$/',
+            'email' => 'nullable|max:255|email',
+            'website' => 'nullable|url|max:255',
+            'lead_type' => 'required|string|in:AB,BC,BDS,CA,DPD MAGMA,MB,ON,Super Leads,TBAB,USA',
+            'lead_status' => 'required|string|in:Prospect,Lanes discussed,Prod/Equip noted,E-mail sent,Portal registration,Quotations,Fob/Have broker,VM/No answer,Diff Dept.,No reply,Not Int.,Asset based',
+
+            //Address Details
+            'address' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
+            'unit_no' => 'nullable|string|max:20|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
+            'city' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.\'\-]*$/',
+            'state' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.\'\-]*$/',
+            'country' => 'nullable|string|max:100|regex:/^[a-zA-Z\s.\'\-]*$/',
+            'postal_code' => 'nullable|regex:/^[a-zA-Z0-9\s]{0,20}$/',
+
+            //Additional Information
+            'contact_person' => 'nullable|string|max:200|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
+            'follow_up_date' => 'nullable|date',
+            'equipment_type' => 'nullable|string|in:Van,Reefer,Flatbed,Triaxle,Maxi,Btrain,Roll tite',
+            'assigned_to' => 'nullable|string|max:200|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
+            'notes' => 'nullable|string|max:500|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
+
+            //Contacts
+            'contacts' => 'nullable|array',
+            'contacts.*.name' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.,\'\-]*$/',
+            'contacts.*.phone' => 'nullable|regex:/^[0-9\-\(\)\s]{0,30}$/',
+            'contacts.*.email' => 'nullable|max:255|email',
+        ]);
     }
 }
