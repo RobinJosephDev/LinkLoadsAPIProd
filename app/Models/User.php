@@ -18,13 +18,13 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name', 
-        'username',       // Assuming this is needed for your app
+        'username',      
         'email', 
         'password', 
-        'role',           // If your app uses roles for users
-        'emp_code',       // Employee code, assuming it's a unique identifier for users
-        'created_at',     // These will be auto-managed by Laravel, no need to manually add them
-        'updated_at',     // These will be auto-managed by Laravel, no need to manually add them
+        'role',         
+        'emp_code',      
+        'created_at',   
+        'updated_at',     
     ];
 
     /**

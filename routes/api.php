@@ -27,55 +27,66 @@ Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show']);
 
 // Authenticated routes (must be logged in with Sanctum token)
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/dashboard-data', [DashboardController::class, 'getDashboardData']);
 
-    // Upload route
+    // Upload
     Route::post('/upload', [FileTransferController::class, 'uploadFile']);
-    Route::get('/download/{folder}/{filename}', [FileTransferController::class, 'downloadFile']);
-
     Route::post('/carriers/{carrier}/upload', [CarrierController::class, 'uploadAgreement']);
 
-    // Email route
+    //Download
+    Route::get('/download/{folder}/{filename}', [FileTransferController::class, 'downloadFile']);
+
+    // Email
     Route::post('/email', [EmailController::class, 'sendEmails']);
 
-    /* Admin routes */
+    /* Admin */
+
+    //Dashboard
+    Route::get('/dashboard-data', [DashboardController::class, 'getDashboardData']);
+
+    //Leads    
     Route::apiResource('/lead', LeadController::class);
 
-    // Cached data test
-    Route::get('/cached', function () {
-        return response()->json(['value' => Cache::get('key', 'default value')]);
-    });
-
+    //Lead Follow-up
     Route::apiResource('/lead-followup', LeadFollowupController::class);
-    Route::apiResource('/order', OrderController::class);
 
-    // Customer CRUD
+    // Customers
     Route::post('/customer', [CustomerController::class, 'store']);
     Route::get('/customer', [CustomerController::class, 'index']);
     Route::get('/customer/{id}', [CustomerController::class, 'show']);
     Route::put('/customer/{id}', [CustomerController::class, 'update']);
     Route::delete('/customer/{id}', [CustomerController::class, 'destroy']);
 
-    // User management
-    Route::get('/users', [UserController::class, 'index']);
-    Route::get('/users/{id}', [UserController::class, 'show']);
-    Route::put('/users/{id}', [UserController::class, 'update']);
-    Route::delete('/users/{id}', [UserController::class, 'destroy']);
+    //Orders
+    Route::apiResource('/order', OrderController::class);
+
+    // Users
+    Route::apiResource('/user', UserController::class);
+
+    //Quotes
+    Route::apiResource('/quote', QuoteController::class);
+    Route::apiResource('/shipment', ShipmentController::class);
+
+    //Carriers&Co
+    Route::apiResource('/carrier', CarrierController::class);
+    Route::apiResource('/vendor', VendorController::class);
+    Route::apiResource('/broker', BrokerController::class);
+
+    // Cached data test
+    Route::get('/cached', function () {
+        return response()->json(['value' => Cache::get('key', 'default value')]);
+    });
+
+    //Logout
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    /* Employee routes */
+    /* Employee */
+
+    //Leads
     Route::get('/employee-lead', [EmployeeLeadController::class, 'index']);
     Route::get('/employee-lead/{id}', [EmployeeLeadController::class, 'show']);
     Route::put('/employee-lead/{id}', [EmployeeLeadController::class, 'update']);
     Route::delete('/employee-lead/{id}', [EmployeeLeadController::class, 'destroy']);
 
-    // Fetch Lead Followups for logged-in employee
+    //Follow-ups
     Route::get('/employee-followup', [EmployeeFollowupController::class, 'index']);
-
-    /* Carrier, Shipment, Quote, Vendor, Broker routes */
-    Route::apiResource('/carrier', CarrierController::class);
-    Route::apiResource('/shipment', ShipmentController::class);
-    Route::apiResource('/quote', QuoteController::class);
-    Route::apiResource('/vendor', VendorController::class);
-    Route::apiResource('/broker', BrokerController::class);
 });
