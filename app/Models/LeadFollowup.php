@@ -36,6 +36,11 @@ class LeadFollowup extends Model
         'contacts',
     ];
 
+    protected $casts = [
+        'contacts' => 'array',
+        'products' => 'array',
+    ];
+    
     public function lead()
     {
         return $this->belongsTo(Lead::class, 'lead_no'); // Ensure the foreign key matches the column in the database

@@ -82,10 +82,7 @@ Route::middleware('auth:sanctum')->group(function () {
     /* Employee */
 
     //Leads
-    Route::get('/employee-lead', [EmployeeLeadController::class, 'index']);
-    Route::get('/employee-lead/{id}', [EmployeeLeadController::class, 'show']);
-    Route::put('/employee-lead/{id}', [EmployeeLeadController::class, 'update']);
-    Route::delete('/employee-lead/{id}', [EmployeeLeadController::class, 'destroy']);
+    Route::apiResource('/employee-lead', EmployeeLeadController::class);
 
     //Follow-ups
     Route::get('/employee-followup', [EmployeeFollowupController::class, 'index']);
