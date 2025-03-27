@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Providers;
+
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
@@ -57,15 +58,33 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function configureRateLimiting(): void
     {
-        // General rate limiting for the API
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
-    
-        // Rate limiting specifically for login attempts
+
         RateLimiter::for('login', function (Request $request) {
-            return Limit::perMinute(5)->by($request->ip()); // 5 requests per minute per IP address
-        });
+            $ip = $request->ip();
+            $attempts = Cache::get($ip . '_attempts', 0);
+        
+            // **Check if the user has exceeded 12 failed attempts**
+            if ($attempts >= 12) {
+                return Limit::none()->response(function () {
+                    return response()->json([
+                        'error' => 'You have been permanently blocked due to too many failed login attempts.'
+                    ], 403);
+                });
+            }
+        
+            // **If under 12 attempts, apply increasing delay**
+            $delay = min(pow(2, $attempts), 3600);
+        
+            return Limit::perMinute(5)->by($ip)->response(function () use ($delay, $ip) {
+                Cache::increment($ip . '_attempts');
+                return response()->json([
+                    'error' => "Too many login attempts. Please try again in $delay seconds."
+                ], 429);
+            });
+        });    
+        
     }
-    
 }
