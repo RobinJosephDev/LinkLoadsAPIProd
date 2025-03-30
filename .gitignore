@@ -1,18 +1,52 @@
+# Ignore PHPUnit cache
 /.phpunit.cache
-/node_modules
+
+# Node.js modules (React)
+node_modules/
+
+# Laravel build files
 /public/build
 /public/hot
 /public/storage
+
+# Laravel storage & logs
 /storage/*.key
-/vendor
+/storage/logs/
+bootstrap/cache/
+
+# Laravel vendor directory
+/vendor/
+
+# Ignore environment variables (sensitive data)
 .env
 .env.backup
 .env.production
+.env.local
+.env.testing
+
+# Example environment file (SHOULD be committed)
+!.env.example
+
+# Laravel Homestead & authentication files
 Homestead.json
 Homestead.yaml
 auth.json
+
+# Debug logs
 npm-debug.log
+yarn-debug.log
 yarn-error.log
+
+# Fleet, IDE, and editor settings
 /.fleet
 /.idea
 /.vscode
+
+# Git-related files (some should not be ignored)
+.git
+# Keep .gitignore but remove accidental `.gitignore 4`
+.gitignore
+
+# (Optional) MacOS and system files
+.DS_Store
+Thumbs.db
