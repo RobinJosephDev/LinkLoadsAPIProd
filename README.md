@@ -12,6 +12,8 @@ This is the backend for a logistics management system, built with Laravel. It pr
 - **Brokers & Vendors**: Manage brokers and vendors.
 - **Quotes System**: Customers can request and send quotes.
 - **Dashboard**: Provides an overview of key business metrics.
+- **File Uploads**: Secure file storage and retrieval for agreements and documents.
+- **Email System**: Send emails from the system.
 
 ## 🛠️ Installation
 ### Prerequisites
@@ -51,39 +53,60 @@ The app will be available at `http://127.0.0.1:8000/`
 
 ## 📂 Project Structure
 - `app/Http/Controllers/`
-  - `OrderController.php` - Manages orders (CRUD, validation, etc.)
-  - `UserController.php` - Handles authentication and user management
+  - `AuthController.php` - Manages authentication and user sessions
+  - `BrokerController.php` - Manages brokers
+  - `CarrierController.php` - Manages carriers
+  - `CustomerController.php` - Handles customer information
+  - `DashboardController.php` - Handles dashboard metrics and insights
+  - `EmailController.php` - Handles email sending
+  - `EmployeeFollowupController.php` - Manages follow-ups for employees
+  - `EmployeeLeadController.php` - Manages leads for employees
+  - `FileTransferController.php` - Manages file uploads and downloads
+  - `LeadController.php` - Handles business leads
   - `LeadFollowupController.php` - Manages lead follow-ups
+  - `OrderController.php` - Manages orders (CRUD, validation, etc.)
   - `QuoteController.php` - Handles quotes sent by customers
   - `ShipmentController.php` - Manages shipment details
-  - `CustomerController.php` - Handles customer information
-  - `BrokerController.php` - Manages brokers
+  - `UserController.php` - Handles authentication and user management
   - `VendorController.php` - Manages vendors
-  - `AuthController.php` - Manages authentication and user sessions
-  - `DashboardController.php` - Handles dashboard metrics and insights
 
 ## 🔧 API Endpoints
-- **Orders**:
-  - `GET /api/orders` - Get all orders
-  - `POST /api/orders` - Create a new order
-  - `GET /api/orders/{id}` - Get order details
-  - `PUT /api/orders/{id}` - Update an order
-  - `DELETE /api/orders/{id}` - Delete an order
-- **Users**:
+- **Authentication**:
   - `POST /api/login` - User authentication
   - `POST /api/register` - User registration
+  - `POST /api/logout` - Logout user
+- **Orders**:
+  - `GET /api/order` - Get all orders
+  - `POST /api/order` - Create a new order
+  - `GET /api/order/{id}` - Get order details
+  - `PUT /api/order/{id}` - Update an order
+  - `DELETE /api/order/{id}` - Delete an order
+- **Users**:
+  - `GET /api/user` - Get all users
+  - `POST /api/user` - Create a new user
 - **Leads & Followups**:
-  - `GET /api/leads` - Fetch all leads
-  - `POST /api/leads` - Create a new lead
+  - `GET /api/lead` - Fetch all leads
+  - `POST /api/lead` - Create a new lead
+  - `GET /api/lead-followup` - Fetch follow-ups
   - `POST /api/lead-followup` - Create a follow-up
 - **Quotes**:
-  - `POST /api/quotes` - Send a quote to a carrier
+  - `POST /api/quote` - Send a quote to a carrier
 - **Shipments**:
-  - `GET /api/shipments` - Fetch all shipments
+  - `GET /api/shipment` - Fetch all shipments
 - **Customers**:
-  - `GET /api/customers` - Fetch customer data
+  - `GET /api/customer` - Fetch customer data
+  - `POST /api/customer` - Create a new customer
+  - `GET /api/customer/{id}` - Get customer details
+  - `PUT /api/customer/{id}` - Update customer
+  - `DELETE /api/customer/{id}` - Delete customer
 - **Dashboard**:
-  - `GET /api/dashboard` - Fetch key metrics and analytics
+  - `GET /api/dashboard-data` - Fetch key metrics and analytics
+- **File Uploads**:
+  - `POST /api/upload` - Upload files
+  - `POST /api/carriers/{carrier}/upload` - Upload carrier agreement
+  - `GET /api/download/{folder}/{filename}` - Download files
+- **Email**:
+  - `POST /api/email` - Send emails
 
 ## ✅ Validation
 Each controller ensures strict validation using Laravel's Validator. Example:
