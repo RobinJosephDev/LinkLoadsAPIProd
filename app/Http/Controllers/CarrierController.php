@@ -163,7 +163,7 @@ class CarrierController extends Controller
             'li_policy_no' => 'nullable|string|max:50|regex:/^[a-zA-Z0-9\s.-]*$/',
             'li_coverage' => 'nullable|numeric',
             'li_start_date' => 'nullable|date',
-            'li_end_date' => 'nullable|date',
+            'li_end_date' => 'nullable|date|after_or_equal:li_start_date',
 
             //Cargo Insurance    
             'ci_provider' => 'nullable|string|max:150|regex:/^[a-zA-Z0-9\s.,\'-]*$/',
