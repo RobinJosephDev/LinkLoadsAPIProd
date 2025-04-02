@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class CustomerController extends Controller
 {
@@ -14,264 +17,178 @@ class CustomerController extends Controller
         $this->customer = new Customer();
     }
 
-    /**
-     * Get all customers.
-     */
     public function index()
     {
         return response()->json($this->customer->orderBy('created_at', 'desc')->get());
     }
 
-
-    /**
-     * Store a newly created customer.
-     */
     public function store(Request $request)
     {
-        // Validate incoming data
-        $validatedData = $request->validate([
-            'cust_type' => 'nullable|string|max:255',
-            'cust_name' => 'required|string|max:100',
-            'cust_ref_no' => 'nullable|string|max:100',
-            'cust_website' => 'nullable|string|max:255',
-            'cust_email' => 'nullable|email|max:100',
-            'cust_contact_no' => 'nullable|string|max:255',
-            'cust_contact_no_ext' => 'nullable|string|max:100',
-            'cust_tax_id' => 'nullable|string|max:255',
-            'cust_primary_address' => 'nullable|string|max:255',
-            'cust_primary_city' => 'nullable|string|max:255',
-            'cust_primary_state' => 'nullable|string|max:255',
-            'cust_primary_country' => 'nullable|string|max:255',
-            'cust_primary_postal' => 'nullable|string|max:255',
-            'cust_primary_unit_no' => 'nullable|string|max:255',
-            'cust_mailing_address' => 'nullable|string|max:255',
-            'cust_mailing_city' => 'nullable|string|max:255',
-            'cust_mailing_state' => 'nullable|string|max:255',
-            'cust_mailing_country' => 'nullable|string|max:255',
-            'cust_mailing_postal' => 'nullable|string|max:255',
-            'cust_mailing_unit_no' => 'nullable|string|max:255',
-            'cust_ap_name' => 'nullable|string|max:255',
-            'cust_ap_address' => 'nullable|string|max:255',
-            'cust_ap_city' => 'nullable|string|max:255',
-            'cust_ap_state' => 'nullable|string|max:255',
-            'cust_ap_country' => 'nullable|string|max:255',
-            'cust_ap_postal' => 'nullable|string|max:255',
-            'cust_ap_unit_no' => 'nullable|string|max:255',
-            'cust_ap_email' => 'nullable|email|max:100',
-            'cust_ap_phone' => 'nullable|string|max:255',
-            'cust_ap_phone_ext' => 'nullable|string|max:255',
-            'cust_ap_fax' => 'nullable|string|max:255',
-            'cust_broker_name' => 'nullable|string|max:255',
-            'cust_bkp_notes' => 'nullable|string|max:255',
-            'cust_bkspl_notes' => 'nullable|string|max:255',
-            'cust_credit_status' => 'nullable|string|max:255',
-            'cust_credit_mop' => 'nullable|string|max:255',
-            'cust_credit_appd' => 'nullable|string|max:255',
-            'cust_credit_expd' => 'nullable|string|max:255',
-            'cust_credit_terms' => 'nullable|string|max:255',
-            'cust_credit_limit' => 'nullable|string|max:255',
-            'cust_credit_notes' => 'nullable|string|max:255',
-            'cust_credit_application' => 'nullable|boolean',
-            'cust_credit_currency' => 'nullable|string|max:255',
-            'cust_sbk_agreement' => 'nullable|file|mimes:pdf,jpeg,png,jpg,doc,docx|max:10240',
-            'cust_credit_agreement' => 'nullable|file|mimes:pdf,jpeg,png,jpg,doc,docx|max:10240',
-            'cust_contact' => 'nullable|array',
-            'cust_contact.*.name' => 'nullable|string|max:255',
-            'cust_contact.*.phone' => 'nullable|string|max:255',
-            'cust_contact.*.ext' => 'nullable|string|max:255',
-            'cust_contact.*.email' => 'nullable|email|max:100',
-            'cust_contact.*.fax' => 'nullable|string|max:255',
-            'cust_contact.*.designation' => 'nullable|string|max:255',
-            'cust_equipment' => 'nullable|array',
-            'cust_equipment.*.equipment' => 'nullable|string|max:255',
-        ]);
+        try {
+            $validator = $this->validateCustomer($request);
 
-        // Sanitize all fields
-        foreach ($validatedData as $key => &$value) {
-            if (is_string($value)) {
-                $value = trim($value); // Trim strings
-            } elseif (is_array($value)) {
-                foreach ($value as &$item) {
-                    if (is_array($item)) {
-                        foreach ($item as $subKey => &$subValue) {
-                            if (is_string($subValue)) {
-                                $subValue = trim($subValue); // Trim nested strings
-                            }
-                        }
-                    } elseif (is_string($item)) {
-                        $item = trim($item); // Trim strings in arrays
-                    }
-                }
-            } elseif (is_numeric($value)) {
-                $value = (float) $value; // Ensure numeric fields are cast properly
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
             }
+
+            $customerData = $validator->validated();
+
+            // Decode JSON fields
+            $customerData['cust_contact'] = is_string($customerData['cust_contact']) ? json_decode($customerData['cust_contact'], true) : $customerData['cust_contact'];
+            $customerData['cust_equipment'] = is_string($customerData['cust_equipment']) ? json_decode($customerData['cust_equipment'], true) : $customerData['cust_equipment'];
+
+            // Handle file uploads
+            if ($request->hasFile('cust_sbk_agreement')) {
+                $customerData['cust_sbk_agreement'] = $request->file('cust_sbk_agreement')->store('customer_agreements', 'public');
+            }
+
+            if ($request->hasFile('cust_credit_agreement')) {
+                $customerData['cust_credit_agreement'] = $request->file('cust_credit_agreement')->store('customer_agreements', 'public');
+            }
+
+            // Create the customer
+            $customer = Customer::create($customerData);
+
+            Log::info('Customer Created:', $customer->toArray());
+
+            return response()->json($customer, 201);
+        } catch (\Exception $e) {
+            Log::error('Error storing customer:', ['error' => $e->getMessage()]);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        // Handle file uploads (if any)
-        if ($request->hasFile('cust_sbk_agreement')) {
-            $validatedData['cust_sbk_agreement'] = $request->file('cust_sbk_agreement')->store('agreements');
-        }
-
-        if ($request->hasFile('cust_credit_agreement')) {
-            $validatedData['cust_credit_agreement'] = $request->file('cust_credit_agreement')->store('agreements');
-        }
-
-        // Encode arrays into JSON for storage
-        if (isset($validatedData['cust_contact']) && is_array($validatedData['cust_contact'])) {
-            $validatedData['cust_contact'] = json_encode($validatedData['cust_contact']);
-        }
-
-        if (isset($validatedData['cust_equipment']) && is_array($validatedData['cust_equipment'])) {
-            $validatedData['cust_equipment'] = json_encode($validatedData['cust_equipment']);
-        }
-
-        // Create new customer
-        $customer = $this->customer->create($validatedData);
-
-        return response()->json(['message' => 'Customer created successfully', 'customer' => $customer], 201);
     }
 
-    /**
-     * Display a specific customer.
-     */
+
     public function show(string $id)
     {
-        $customer = $this->customer->find($id);
-
-        if (!$customer) {
-            return response()->json(['error' => 'Customer not found'], 404);  // Return 404 if customer not found
-        }
-
-        return response()->json($customer);
+        return $this->customer->find($id);
     }
 
-    /**
-     * Update a specific customer.
-     */
     public function update(Request $request, string $id)
     {
-        $customer = $this->customer->find($id);
+        try {
+            $customer = $this->customer->find($id);
 
-        if (!$customer) {
-            return response()->json(['error' => 'Customer not found'], 404);
-        }
-
-        // Validate incoming data
-        $validatedData = $request->validate([
-            'cust_type' => 'nullable|string|max:255',
-            'cust_name' => 'required|string|max:100',
-            'cust_ref_no' => 'nullable|string|max:100',
-            'cust_website' => 'nullable|string|max:255',
-            'cust_email' => 'nullable|email|max:100',
-            'cust_contact_no' => 'nullable|string|max:255',
-            'cust_contact_no_ext' => 'nullable|string|max:100',
-            'cust_tax_id' => 'nullable|string|max:255',
-            'cust_primary_address' => 'nullable|string|max:255',
-            'cust_primary_city' => 'nullable|string|max:255',
-            'cust_primary_state' => 'nullable|string|max:255',
-            'cust_primary_country' => 'nullable|string|max:255',
-            'cust_primary_postal' => 'nullable|string|max:255',
-            'cust_primary_unit_no' => 'nullable|string|max:255',
-            'cust_mailing_address' => 'nullable|string|max:255',
-            'cust_mailing_city' => 'nullable|string|max:255',
-            'cust_mailing_state' => 'nullable|string|max:255',
-            'cust_mailing_country' => 'nullable|string|max:255',
-            'cust_mailing_postal' => 'nullable|string|max:255',
-            'cust_mailing_unit_no' => 'nullable|string|max:255',
-            'cust_ap_name' => 'nullable|string|max:255',
-            'cust_ap_address' => 'nullable|string|max:255',
-            'cust_ap_city' => 'nullable|string|max:255',
-            'cust_ap_state' => 'nullable|string|max:255',
-            'cust_ap_country' => 'nullable|string|max:255',
-            'cust_ap_postal' => 'nullable|string|max:255',
-            'cust_ap_unit_no' => 'nullable|string|max:255',
-            'cust_ap_email' => 'nullable|email|max:100',
-            'cust_ap_phone' => 'nullable|string|max:255',
-            'cust_ap_phone_ext' => 'nullable|string|max:255',
-            'cust_ap_fax' => 'nullable|string|max:255',
-            'cust_broker_name' => 'nullable|string|max:255',
-            'cust_bkp_notes' => 'nullable|string|max:255',
-            'cust_bkspl_notes' => 'nullable|string|max:255',
-            'cust_credit_status' => 'nullable|string|max:255',
-            'cust_credit_mop' => 'nullable|string|max:255',
-            'cust_credit_appd' => 'nullable|string|max:255',
-            'cust_credit_expd' => 'nullable|string|max:255',
-            'cust_credit_terms' => 'nullable|string|max:255',
-            'cust_credit_limit' => 'nullable|string|max:255',
-            'cust_credit_notes' => 'nullable|string|max:255',
-            'cust_credit_application' => 'nullable|boolean',
-            'cust_credit_currency' => 'nullable|string|max:255',
-            'cust_sbk_agreement' => 'nullable',
-            'cust_credit_agreement' => 'nullable',
-            'cust_contact' => 'nullable|array',
-            'cust_contact.*.name' => 'nullable|string|max:255',
-            'cust_contact.*.phone' => 'nullable|string|max:255',
-            'cust_contact.*.ext' => 'nullable|string|max:255',
-            'cust_contact.*.email' => 'nullable|email|max:100',
-            'cust_contact.*.fax' => 'nullable|string|max:255',
-            'cust_contact.*.designation' => 'nullable|string|max:255',
-            'cust_equipment' => 'nullable|array',
-            'cust_equipment.*.equipment' => 'nullable|string|max:255',
-        ]);
-
-        // Sanitize all fields
-        foreach ($validatedData as $key => &$value) {
-            if (is_string($value)) {
-                $value = trim($value); // Trim strings
-            } elseif (is_array($value)) {
-                foreach ($value as &$item) {
-                    if (is_array($item)) {
-                        foreach ($item as $subKey => &$subValue) {
-                            if (is_string($subValue)) {
-                                $subValue = trim($subValue); // Trim nested strings
-                            }
-                        }
-                    } elseif (is_string($item)) {
-                        $item = trim($item); // Trim strings in arrays
-                    }
-                }
-            } elseif (is_numeric($value)) {
-                $value = (float) $value; // Ensure numeric fields are cast properly
+            if (!$customer) {
+                return response()->json(['error' => 'Customer not found'], 404);
             }
+
+            $validatedData = $this->validateCustomer($request, $customer->id);
+
+            if ($validatedData->fails()) {
+                return response()->json(['errors' => $validatedData->errors()], 422);
+            }
+
+            // Extract validated data as an array
+            $customerData = $validatedData->validated();
+
+            // Decode JSON fields
+            $customerData['cust_contact'] = is_string($customerData['cust_contact']) ? json_decode($customerData['cust_contact'], true) : $customerData['cust_contact'];
+            $customerData['cust_equipment'] = is_string($customerData['cust_equipment']) ? json_decode($customerData['cust_equipment'], true) : $customerData['cust_equipment'];
+
+            // Handle file uploads
+            if ($request->hasFile('cust_sbk_agreement')) {
+                $customerData['cust_sbk_agreement'] = $request->file('cust_sbk_agreement')->store('customer_agreements', 'public');
+            }
+
+            if ($request->hasFile('cust_credit_agreement')) {
+                $customerData['cust_credit_agreement'] = $request->file('cust_credit_agreement')->store('customer_agreements', 'public');
+            }
+
+            $customer->update($validatedData->validated());
+
+            return response()->json($customer);
+        } catch (\Exception $e) {
+            Log::error('Error updating customer:', ['error' => $e->getMessage()]);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        // Handle file uploads (if any)
-        if ($request->hasFile('cust_sbk_agreement')) {
-            $validatedData['cust_sbk_agreement'] = $request->file('cust_sbk_agreement')->store('agreements');
-        }
-
-        if ($request->hasFile('cust_credit_agreement')) {
-            $validatedData['cust_credit_agreement'] = $request->file('cust_credit_agreement')->store('agreements');
-        }
-
-        // Handle JSON encoding for arrays
-        if (isset($validatedData['cust_contact']) && is_array($validatedData['cust_contact'])) {
-            $validatedData['cust_contact'] = json_encode($validatedData['cust_contact']);
-        }
-
-        if (isset($validatedData['cust_equipment']) && is_array($validatedData['cust_equipment'])) {
-            $validatedData['cust_equipment'] = json_encode($validatedData['cust_equipment']);
-        }
-
-        // Update the customer data
-        $customer->update($validatedData);
-
-        return response()->json($customer);
     }
 
-    /**
-     * Delete a specific customer.
-     */
     public function destroy(string $id)
     {
         $customer = $this->customer->find($id);
-
         if (!$customer) {
             return response()->json(['error' => 'Customer not found'], 404);
         }
-
         $customer->delete();
-
         return response()->json(['message' => 'Customer deleted successfully']);
+    }
+
+    private function validateCustomer(Request $request)
+    {
+        return Validator::make($request->all(), [
+
+            //Customer Info
+            'cust_type' => 'nullable|string|in:Manufacturer,Trader,Distributor,Retailer,Freight Forwarder',
+            'cust_name' => 'required|string|max:200|regex:/^[a-zA-Z0-9\s,.\'\-]+$/',
+            'cust_ref_no' => 'required|string|max:100|regex:/^[a-zA-Z0-9\s,.\'\-]+$/',
+            'cust_website' => 'nullable|max:150|url',
+            'cust_email' => 'nullable|max:255|email',
+            'cust_contact_no' => 'nullable|string|max:30|regex:/^[0-9-+()\s]*$/',
+            'cust_contact_no_ext' => 'nullable|string|max:10|regex:/^[a-zA-Z0-9\-]*$/',
+            'cust_tax_id' => 'nullable|string|max:20|regex:/^[a-zA-Z0-9\-_. ]*$/',
+
+
+            //Primary Address
+            'cust_primary_address' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
+            'cust_primary_city' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.\'\-]*$/',
+            'cust_primary_state' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.\'\-]*$/',
+            'cust_primary_country' => 'nullable|string|max:100|regex:/^[a-zA-Z\s.\'\-]*$/',
+            'cust_primary_postal' => 'nullable|string|max:20|regex:/^[a-zA-Z0-9-\s]*$/',
+            'cust_primary_unit_no' => 'nullable|string|max:30|regex:/^[a-zA-Z0-9#\-\s]*$/',
+
+
+            //Mailing Address
+            'cust_mailing_address' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
+            'cust_mailing_city' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.\'\-]*$/',
+            'cust_mailing_state' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.\'\-]*$/',
+            'cust_mailing_country' => 'nullable|string|max:100|regex:/^[a-zA-Z\s.\'\-]*$/',
+            'cust_mailing_postal' => 'nullable|string|max:20|regex:/^[a-zA-Z0-9-\s]*$/',
+            'cust_mailing_unit_no' => 'nullable|string|max:30|regex:/^[a-zA-Z0-9#\-\s]*$/',
+
+            //Account Payable
+            'cust_ap_name' => 'nullable|string|max:200|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
+            'cust_ap_address' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
+            'cust_ap_city' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.\'\-]*$/',
+            'cust_ap_state' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.\'\-]*$/',
+            'cust_ap_country' => 'nullable|string|max:100|regex:/^[a-zA-Z\s.\'\-]*$/',
+            'cust_ap_postal' => 'nullable|string|max:20|regex:/^[a-zA-Z0-9-\s]*$/',
+            'cust_ap_unit_no' => 'nullable|string|max:30|regex:/^[a-zA-Z0-9#\-/\s]*$/',
+            'cust_ap_email' => 'nullable|max:255|email',
+            'cust_ap_phone' => 'nullable|string|max:30|regex:/^[0-9-+()\s]*$/',
+            'cust_ap_phone_ext' => 'nullable|string|max:10|regex:/^[a-zA-Z0-9\-]*$/',
+            'cust_ap_fax' => 'nullable|string|max:30|regex:/^[0-9-+()\s]*$/',
+
+            //Custom Broker
+            'cust_broker_name' => 'nullable|string|max:200|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
+            'cust_bkp_notes' => 'nullable|string|max:500|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
+            'cust_bkspl_notes' => 'nullable|string|max:500|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
+
+            //Credit
+            'cust_credit_status' => 'nullable|string|in:Approved,Not Approved',
+            'cust_credit_mop' => 'nullable|string|max:100|regex:/^[a-zA-Z\s.\'\-]*$/',
+            'cust_credit_appd' => 'nullable|date',
+            'cust_credit_expd' => 'nullable|date|after_or_equal:cust_credit_appd',
+            'cust_credit_terms' => 'nullable|string|max:100|regex:/^[a-zA-Z\s.\'\-]*$/',
+            'cust_credit_limit' => 'nullable|integer|min:0|max:9999999999',
+            'cust_credit_notes' => 'nullable|string|max:500|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
+            'cust_credit_application' => 'nullable|boolean',
+            'cust_credit_currency' => 'nullable|string|max:10|regex:/^[a-zA-Z0-9\-]*$/',
+            'cust_sbk_agreement' => 'nullable|string',
+            'cust_credit_agreement' => 'nullable|string',
+
+            //Contacts
+            'cust_contact' => 'nullable|array',
+            'cust_contact.*.name' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.,\'\-]*$/',
+            'cust_contact.*.phone' => 'nullable|regex:/^[0-9\-\(\)\s]{0,30}$/',
+            'cust_contact.*.ext' => 'nullable|string|max:10|regex:/^[a-zA-Z0-9\-]*$/',
+            'cust_contact.*.email' => 'nullable|max:255|email',
+            'cust_contact.*.fax' => 'nullable|regex:/^[0-9\-\(\)\s]{0,30}$/',
+            'cust_contact.*.designation' => 'nullable|string|max:100|regex:/^[a-zA-Z\s.,\'\-]*$/',
+
+            //Equipments
+            'cust_equipment' => 'nullable|array',
+            'cust_equipment.*.equipment' => 'nullable|string|in:Van,Reefer,Flatbed,Triaxle,Maxi,Btrain,Roll tite',
+        ]);
     }
 }
