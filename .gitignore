@@ -50,3 +50,6 @@ yarn-error.log
 # (Optional) MacOS and system files
 .DS_Store
 Thumbs.db
+
+# Ignore Zone Identifier files
+*:Zone.Identifier
