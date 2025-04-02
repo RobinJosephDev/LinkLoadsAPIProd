@@ -62,6 +62,10 @@ class Customer extends Model
         'cust_equipment',
     ];
 
-
+    // Casting fields as arrays or other types
+    protected $casts = [
+        'cust_contact' => 'array',
+        'cust_equipment' => 'array',
+    ];
 
 }
