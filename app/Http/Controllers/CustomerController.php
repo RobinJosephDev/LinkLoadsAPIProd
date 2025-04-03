@@ -171,7 +171,7 @@ class CustomerController extends Controller
             'cust_credit_mop' => 'nullable|string|max:100|regex:/^[a-zA-Z\s.\'\-]*$/',
             'cust_credit_appd' => 'nullable|date',
             'cust_credit_expd' => 'nullable|date|after_or_equal:cust_credit_appd',
-            'cust_credit_terms' => 'nullable|string|max:100|regex:/^[a-zA-Z\s.\'\-]*$/',
+            'cust_credit_terms' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
             'cust_credit_limit' => 'nullable|integer|min:0|max:9999999999',
             'cust_credit_notes' => 'nullable|string|max:500|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
             'cust_credit_application' => 'nullable|boolean',
