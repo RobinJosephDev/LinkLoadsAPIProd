@@ -81,13 +81,12 @@ class CustomerController extends Controller
             if ($validatedData->fails()) {
                 return response()->json(['errors' => $validatedData->errors()], 422);
             }
-
-            // Extract validated data as an array
             $customerData = $validatedData->validated();
 
             // Decode JSON fields
             $customerData['cust_contact'] = is_string($customerData['cust_contact']) ? json_decode($customerData['cust_contact'], true) : $customerData['cust_contact'];
             $customerData['cust_equipment'] = is_string($customerData['cust_equipment']) ? json_decode($customerData['cust_equipment'], true) : $customerData['cust_equipment'];
+
 
             // Handle file uploads
             if ($request->hasFile('cust_sbk_agreement')) {
@@ -98,6 +97,7 @@ class CustomerController extends Controller
                 $customerData['cust_credit_agreement'] = $request->file('cust_credit_agreement')->store('customer_agreements', 'public');
             }
 
+            // Update the customer record
             $customer->update($validatedData->validated());
 
             return response()->json($customer);
@@ -105,10 +105,8 @@ class CustomerController extends Controller
             Log::error('Error updating customer:', ['error' => $e->getMessage()]);
             return response()->json(['error' => $e->getMessage()], 500);
         }
-        if ($validator->fails()) {
-            dd($validator->errors()->all());
-        }
     }
+
 
     public function destroy(string $id)
     {
@@ -132,24 +130,22 @@ class CustomerController extends Controller
             'cust_email' => 'nullable|max:255|email',
             'cust_contact_no' => 'nullable|string|max:30|regex:/^[0-9-+()\s]*$/',
             'cust_contact_no_ext' => 'nullable|string|max:10|regex:/^[a-zA-Z0-9\-]*$/',
-            'cust_tax_id' => 'nullable|string|max:20|regex:/^[a-zA-Z0-9\-_. ]*$/',
-
+            'cust_tax_id' => 'nullable|string|max:20|regex:/^[a-zA-Z0-9._\- ]*$/',
 
             //Primary Address
             'cust_primary_address' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
             'cust_primary_city' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.\'\-]*$/',
             'cust_primary_state' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.\'\-]*$/',
             'cust_primary_country' => 'nullable|string|max:100|regex:/^[a-zA-Z\s.\'\-]*$/',
-            'cust_primary_postal' => 'nullable|string|max:20|regex:/^[a-zA-Z0-9-\s]*$/',
+            'cust_primary_postal' => 'nullable|string|max:20|regex:/^[a-zA-Z0-9\s\-]*$/',
             'cust_primary_unit_no' => 'nullable|string|max:30|regex:/^[a-zA-Z0-9#\-\s]*$/',
-
 
             //Mailing Address
             'cust_mailing_address' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
             'cust_mailing_city' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.\'\-]*$/',
             'cust_mailing_state' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.\'\-]*$/',
             'cust_mailing_country' => 'nullable|string|max:100|regex:/^[a-zA-Z\s.\'\-]*$/',
-            'cust_mailing_postal' => 'nullable|string|max:20|regex:/^[a-zA-Z0-9-\s]*$/',
+            'cust_mailing_postal' => 'nullable|string|max:20|regex:/^[a-zA-Z0-9\s\-]*$/',
             'cust_mailing_unit_no' => 'nullable|string|max:30|regex:/^[a-zA-Z0-9#\-\s]*$/',
 
             //Account Payable
@@ -158,8 +154,8 @@ class CustomerController extends Controller
             'cust_ap_city' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.\'\-]*$/',
             'cust_ap_state' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.\'\-]*$/',
             'cust_ap_country' => 'nullable|string|max:100|regex:/^[a-zA-Z\s.\'\-]*$/',
-            'cust_ap_postal' => 'nullable|string|max:20|regex:/^[a-zA-Z0-9-\s]*$/',
-            'cust_ap_unit_no' => 'nullable|string|max:30|regex:/^[a-zA-Z0-9#-\s]*$/',
+            'cust_ap_postal' => 'nullable|string|max:20|regex:/^[a-zA-Z0-9\s\-]*$/',
+            'cust_ap_unit_no' => 'nullable|string|max:30|regex:/^[a-zA-Z0-9#\-\s]*$/',
             'cust_ap_email' => 'nullable|max:255|email',
             'cust_ap_phone' => 'nullable|string|max:30|regex:/^[0-9-+()\s]*$/',
             'cust_ap_phone_ext' => 'nullable|string|max:10|regex:/^[a-zA-Z0-9-]*$/',
@@ -179,7 +175,7 @@ class CustomerController extends Controller
             'cust_credit_limit' => 'nullable|integer|min:0|max:9999999999',
             'cust_credit_notes' => 'nullable|string|max:500|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
             'cust_credit_application' => 'nullable|boolean',
-            'cust_credit_currency' => 'nullable|string|max:10|regex:/^[a-zA-Z0-9-]*$/',
+            'cust_credit_currency' => 'nullable|string|max:10|regex:/^[a-zA-Z0-9\-]*$/',
             'cust_sbk_agreement' => 'nullable|string',
             'cust_credit_agreement' => 'nullable|string',
 

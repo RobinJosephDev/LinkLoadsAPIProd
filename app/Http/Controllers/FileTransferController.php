@@ -16,6 +16,8 @@ class FileTransferController extends Controller
             $request->validate([
                 'brok_carr_aggmt' => 'nullable|file|mimes:doc,docx,pdf,jpg,jpeg,png,gif,tiff,bmp|max:10240',
                 'coi_cert' => 'nullable|file|mimes:doc,docx,pdf,jpg,jpeg,png,gif,tiff,bmp|max:10240',
+                'cust_sbk_agreement' => 'nullable|file|mimes:doc,docx,pdf,jpg,jpeg,png,gif,tiff,bmp|max:10240',
+                'cust_credit_agreement' => 'nullable|file|mimes:doc,docx,pdf,jpg,jpeg,png,gif,tiff,bmp|max:10240',
             ]);
 
             $uploadedFiles = [];
@@ -73,6 +75,62 @@ class FileTransferController extends Controller
                 } else {
                     Log::error('coi_cert upload failed: Invalid file.');
                     return response()->json(['error' => 'Invalid coi_cert file'], 400);
+                }
+            }
+
+            if ($request->hasFile('cust_sbk_agreement')) {
+                $file = $request->file('cust_sbk_agreement');
+
+                Log::info("File received: " . $file->getClientOriginalName());
+                Log::info("File size: " . $file->getSize() . " bytes");
+
+                if ($file->isValid()) {
+                    $originalName = $file->getClientOriginalName();
+                    $fileName = time() . '_' . $originalName;
+                    $filePath = $file->storeAs('customer_agreements', $fileName, 'public');
+
+                    if (!$filePath) {
+                        Log::error("Failed to store cust_sbk_agreement.");
+                        return response()->json(['error' => 'File storage failed'], 500);
+                    }
+
+                    Log::info("File stored at: storage/customer_agreements/$fileName");
+
+                    $uploadedFiles['cust_sbk_agreement'] = [
+                        'fileUrl' => asset("storage/customer_agreements/$fileName"),
+                        'fileName' => $originalName,
+                    ];
+                } else {
+                    Log::error('cust_sbk_agreement upload failed: Invalid file.');
+                    return response()->json(['error' => 'Invalid cust_sbk_agreement file'], 400);
+                }
+            }
+
+            if ($request->hasFile('cust_credit_agreement')) {
+                $file = $request->file('cust_credit_agreement');
+
+                Log::info("File received: " . $file->getClientOriginalName());
+                Log::info("File size: " . $file->getSize() . " bytes");
+
+                if ($file->isValid()) {
+                    $originalName = $file->getClientOriginalName();
+                    $fileName = time() . '_' . $originalName;
+                    $filePath = $file->storeAs('customer_agreements', $fileName, 'public');
+
+                    if (!$filePath) {
+                        Log::error("Failed to store cust_credit_agreement.");
+                        return response()->json(['error' => 'File storage failed'], 500);
+                    }
+
+                    Log::info("File stored at: storage/customer_agreements/$fileName");
+
+                    $uploadedFiles['cust_credit_agreement'] = [
+                        'fileUrl' => asset("storage/customer_agreements/$fileName"),
+                        'fileName' => $originalName,
+                    ];
+                } else {
+                    Log::error('cust_credit_agreement upload failed: Invalid file.');
+                    return response()->json(['error' => 'Invalid cust_credit_agreement file'], 400);
                 }
             }
 
