@@ -136,18 +136,18 @@ class VendorController extends Controller
             //Acc Receivable
             'ar_name' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.,\'\-]*$/',
             'ar_email' => 'nullable|max:255|email',
-            'ar_contact_no' =>  'nullable|string|max:15|regex:/^\d*$/',
-            'ar_ext' => 'nullable|string|max:10|regex:/^\d*$/',
+            'ar_contact_no' =>  'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
+            'ar_ext' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,20}$/',
 
             //Acc Payable
             'ap_name' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.,\'\-]*$/',
             'ap_email' => 'nullable|max:255|email',
-            'ap_contact_no' => 'nullable|string|max:15|regex:/^\d*$/',
-            'ap_ext' => 'nullable|string|max:10|regex:/^\d*$/',
+            'ap_contact_no' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
+            'ap_ext' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,20}$/',
 
             //Banking
             'bank_name' => 'nullable|string|max:150|regex:/^[a-zA-Z\s.,\'\-]*$/',
-            'bank_phone' => 'nullable|string|max:15|regex:/^\d*$/',
+            'bank_phone' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
             'bank_email' => 'nullable|max:255|email',
             'bank_us_acc_no' => 'nullable|string|size:9',
             'bank_cdn_acc_no' => 'nullable|string|max:12|regex:/^\d*$/',
@@ -170,7 +170,7 @@ class VendorController extends Controller
             'contacts.*.name' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.,\'\-]*$/',
             'contacts.*.phone' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
             'contacts.*.email' => 'nullable|max:255|email',
-            'contacts.*.fax' => 'nullable|regex:/^[0-9\-\(\)\s]{0,30}$/',
+            'contacts.*.fax' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
             'contacts.*.designation' => 'nullable|string|max:100|regex:/^[a-zA-Z\s.,\'\-]*$/',
         ]);
     }

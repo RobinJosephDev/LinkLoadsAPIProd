@@ -63,16 +63,16 @@ class BrokerController extends Controller
     private function validateRequest(Request $request, $id = null)
     {
         $rules = [
-            'broker_name' => 'required|string|max:200|regex:/^[a-zA-Z\s.\'\-]+$/',
+            'broker_name' => 'required|string|max:200|regex:/^[a-zA-Z0-9\s.\'\-]+$/',
             'broker_address' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
             'broker_city'    => 'nullable|string|max:200|regex:/^[a-zA-Z\s.\'\-]*$/',
             'broker_state'   => 'nullable|string|max:200|regex:/^[a-zA-Z\s.\'\-]*$/',
             'broker_country' => 'nullable|string|max:100|regex:/^[a-zA-Z\s.\'\-]*$/',
-            'broker_postal'  => 'nullable|regex:/^[a-zA-Z0-9]{0,20}$/',
+            'broker_postal'  => 'nullable|regex:/^[a-zA-Z0-9\s]{0,20}$/',
             'broker_email'   => 'nullable|max:255|email',
             'broker_phone' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
             'broker_ext' => 'nullable|regex:/^\+?[0-9]{0,10}$/',
-            'broker_fax'     => 'nullable|regex:/^[0-9\-\(\)\s]{0,30}$/'
+            'broker_fax'     => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
         ];
 
         return $request->validate($rules);
