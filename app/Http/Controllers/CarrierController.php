@@ -179,7 +179,7 @@ class CarrierController extends Controller
             'primary_state' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.\'\-]*$/',
             'primary_country' => 'nullable|string|max:100|regex:/^[a-zA-Z\s.\'\-]*$/',
             'primary_postal' => 'nullable|string|max:20|regex:/^[a-zA-Z0-9-\s]*$/',
-            'primary_phone' => 'nullable|string|max:30|regex:/^[0-9-+()\s]*$/',
+            'primary_phone' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
 
             //Mailing Address
             'mailing_address' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
@@ -187,7 +187,7 @@ class CarrierController extends Controller
             'mailing_state' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.\'\-]*$/',
             'mailing_country' => 'nullable|string|max:100|regex:/^[a-zA-Z\s.\'\-]*$/',
             'mailing_postal' => 'nullable|string|max:20|regex:/^[a-zA-Z0-9-\s]*$/',
-            'mailing_phone' => 'nullable|string|max:30|regex:/^[0-9-+()\s]*$/',
+            'mailing_phone' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
 
             //Internal Notes
             'int_notes' => 'nullable|string|max:500|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
@@ -195,9 +195,9 @@ class CarrierController extends Controller
             // Contacts
             'contacts' => 'nullable|array',
             'contacts.*.name' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.,\'\-]*$/',
-            'contacts.*.phone' => 'nullable|regex:/^[0-9\-\(\)\s]{0,30}$/',
+            'contacts.*.phone' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
             'contacts.*.email' => 'nullable|max:255|email',
-            'contacts.*.fax' => 'nullable|regex:/^[0-9\-\(\)\s]{0,30}$/',
+            'contacts.*.fax' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
             'contacts.*.designation' => 'nullable|string|max:100|regex:/^[a-zA-Z\s.,\'\-]*$/',
 
             // Equipments

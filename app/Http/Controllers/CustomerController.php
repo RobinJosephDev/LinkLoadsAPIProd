@@ -128,7 +128,7 @@ class CustomerController extends Controller
             'cust_ref_no' => 'required|string|max:100|regex:/^[a-zA-Z0-9\s,.\'\-]+$/',
             'cust_website' => 'nullable|max:150|url',
             'cust_email' => 'nullable|max:255|email',
-            'cust_contact_no' => 'nullable|string|max:30|regex:/^[0-9-+()\s]*$/',
+            'cust_contact_no' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
             'cust_contact_no_ext' => 'nullable|string|max:10|regex:/^[a-zA-Z0-9\-]*$/',
             'cust_tax_id' => 'nullable|string|max:20|regex:/^[a-zA-Z0-9._\- ]*$/',
 
@@ -157,9 +157,9 @@ class CustomerController extends Controller
             'cust_ap_postal' => 'nullable|string|max:20|regex:/^[a-zA-Z0-9\s\-]*$/',
             'cust_ap_unit_no' => 'nullable|string|max:30|regex:/^[a-zA-Z0-9#\-\s]*$/',
             'cust_ap_email' => 'nullable|max:255|email',
-            'cust_ap_phone' => 'nullable|string|max:30|regex:/^[0-9-+()\s]*$/',
+            'cust_ap_phone' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
             'cust_ap_phone_ext' => 'nullable|string|max:10|regex:/^[a-zA-Z0-9-]*$/',
-            'cust_ap_fax' => 'nullable|string|max:30|regex:/^[0-9-+()\s]*$/',
+            'cust_ap_fax' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
 
             //Custom Broker
             'cust_broker_name' => 'nullable|string|max:200|regex:/^[a-zA-Z0-9\s,.\'\-]*$/',
@@ -182,10 +182,10 @@ class CustomerController extends Controller
             //Contacts
             'cust_contact' => 'nullable|array',
             'cust_contact.*.name' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.,\'\-]*$/',
-            'cust_contact.*.phone' => 'nullable|regex:/^[0-9\-\(\)\s]{0,30}$/',
+            'cust_contact.*.phone' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
             'cust_contact.*.ext' => 'nullable|string|max:10|regex:/^[a-zA-Z0-9-]*$/',
             'cust_contact.*.email' => 'nullable|max:255|email',
-            'cust_contact.*.fax' => 'nullable|regex:/^[0-9\-\(\)\s]{0,30}$/',
+            'cust_contact.*.fax' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
             'cust_contact.*.designation' => 'nullable|string|max:100|regex:/^[a-zA-Z\s.,\'\-]*$/',
 
             //Equipments

@@ -114,8 +114,8 @@ class VendorController extends Controller
             'primary_country' =>  'nullable|string|max:100|regex:/^[a-zA-Z\s.\'\-]*$/',
             'primary_postal' => 'nullable|regex:/^[a-zA-Z0-9\s]{0,20}$/',
             'primary_email' => 'nullable|max:255|email',
-            'primary_phone' => 'nullable|regex:/^[0-9\-\(\)\s]{0,30}$/',
-            'primary_fax' => 'nullable|regex:/^[0-9\-\(\)\s]{0,30}$/',
+            'primary_phone' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
+            'primary_fax' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
 
             //Mailing Address
             'sameAsPrimary' => 'nullable|boolean',
@@ -125,8 +125,8 @@ class VendorController extends Controller
             'mailing_country' => 'nullable|string|max:100|regex:/^[a-zA-Z\s.\'\-]*$/',
             'mailing_postal' => 'nullable|regex:/^[a-zA-Z0-9\s]{0,20}$/',
             'mailing_email' => 'nullable|max:255|email',
-            'mailing_phone' => 'nullable|regex:/^[0-9\-\(\)\s]{0,30}$/',
-            'mailing_fax' => 'nullable|regex:/^[0-9\-\(\)\s]{0,30}$/',
+            'mailing_phone' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
+            'mailing_fax' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
 
             //Additional
             'us_tax_id' => 'nullable|string|size:9',
@@ -168,7 +168,7 @@ class VendorController extends Controller
             // Contacts
             'contacts' => 'nullable|array',
             'contacts.*.name' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.,\'\-]*$/',
-            'contacts.*.phone' => 'nullable|regex:/^[0-9\-\(\)\s]{0,30}$/',
+            'contacts.*.phone' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
             'contacts.*.email' => 'nullable|max:255|email',
             'contacts.*.fax' => 'nullable|regex:/^[0-9\-\(\)\s]{0,30}$/',
             'contacts.*.designation' => 'nullable|string|max:100|regex:/^[a-zA-Z\s.,\'\-]*$/',

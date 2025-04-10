@@ -110,7 +110,7 @@ class LeadFollowupController extends Controller
             'lead_no' =>  'required|string|max:100|regex:/^[a-zA-Z0-9\s.,\'\-]+$/',
             'lead_date' => 'required|date',
             'customer_name' => 'nullable|string|max:200|regex:/^[a-zA-Z0-9\s.,\'\-]*$/',
-            'phone' => 'nullable|regex:/^[0-9\-\(\)\s]{0,30}$/',
+            'phone' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
             'email' => 'nullable|max:255|email',
             'lead_type' => 'required|string|in:AB,BC,BDS,CA,DPD MAGMA,MB,ON,Super Leads,TBAB,USA',
             'lead_status' => 'required|string|in:New,In Progress,Completed,On Hold,Lost',
@@ -132,7 +132,7 @@ class LeadFollowupController extends Controller
             //Contacts
             'contacts' => 'nullable|array',
             'contacts.*.name' => 'nullable|string|max:200|regex:/^[a-zA-Z\s.,\'\-]*$/',
-            'contacts.*.phone' => 'nullable|regex:/^[0-9\-\(\)\s]{0,30}$/',
+            'contacts.*.phone' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
             'contacts.*.email' => 'nullable|max:255|email',
 
             //Products

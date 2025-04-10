@@ -70,7 +70,7 @@ class BrokerController extends Controller
             'broker_country' => 'nullable|string|max:100|regex:/^[a-zA-Z\s.\'\-]*$/',
             'broker_postal'  => 'nullable|regex:/^[a-zA-Z0-9]{0,20}$/',
             'broker_email'   => 'nullable|max:255|email',
-            'broker_phone' => 'nullable|regex:/^[0-9\-\(\)\s]{0,30}$/',
+            'broker_phone' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
             'broker_ext' => 'nullable|regex:/^\+?[0-9]{0,10}$/',
             'broker_fax'     => 'nullable|regex:/^[0-9\-\(\)\s]{0,30}$/'
         ];
