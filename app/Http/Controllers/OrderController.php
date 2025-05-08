@@ -66,6 +66,26 @@ class OrderController extends Controller
         return $order->delete();
     }
 
+    public function duplicate(string $id)
+    {
+        $order = $this->order->find($id);
+
+        if (!$order) {
+            return response()->json(['error' => 'Order not found'], 404);
+        }
+
+        $newOrder = $order->replicate();
+        $newOrder->created_at = now();
+        $newOrder->updated_at = now();
+        $newOrder->save();
+
+        return response()->json([
+            'message' => 'Order duplicated successfully.',
+            'order' => $newOrder
+        ], 201);
+    }
+
+
     private function validateOrder(Request $request, $id = null)
     {
         return Validator::make($request->all(), [

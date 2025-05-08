@@ -58,6 +58,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Orders
     Route::apiResource('/order', OrderController::class);
+    Route::post('/order/{id}/duplicate', [OrderController::class, 'duplicate']);
 
     // Users
     Route::apiResource('/user', UserController::class);
