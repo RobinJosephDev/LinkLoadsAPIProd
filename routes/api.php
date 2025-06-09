@@ -17,6 +17,7 @@ use App\Http\Controllers\EmployeeFollowupController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\VendorController;
+use App\Http\Controllers\EmployeeAccessController;
 use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 

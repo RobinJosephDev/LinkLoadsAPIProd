@@ -17,14 +17,14 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name', 
-        'username',      
-        'email', 
-        'password', 
-        'role',         
-        'emp_code',      
-        'created_at',   
-        'updated_at',     
+        'name',
+        'username',
+        'email',
+        'password',
+        'role',
+        'emp_code',
+        'created_at',
+        'updated_at',
     ];
 
     /**
@@ -45,4 +45,14 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    // app/Models/User.php
+
+    // In User.php (User model)
+
+    public function permissions()
+    {
+        // Adjust table/columns according to your schema
+        return $this->hasMany(EmployeeAccess::class, 'user_id');
+    }
 }

@@ -11,6 +11,7 @@ use Illuminate\Validation\ValidationException;
 use PragmaRX\Google2FA\Google2FA;
 use Illuminate\Support\Facades\RateLimiter;
 use Symfony\Component\HttpFoundation\Response;
+use App\Models\EmployeeAccess;
 
 class AuthController extends Controller
 {
@@ -88,6 +89,8 @@ class AuthController extends Controller
      */
 
 
+
+
     public function login(Request $request)
     {
         $request->validate([
@@ -96,21 +99,19 @@ class AuthController extends Controller
         ]);
 
         $throttleKey = 'login_attempts:' . $request->ip();
-        $maxAttempts = 12; // Permanent block threshold
-        $lockoutSeconds = 60; // Temporary lockout duration
+        $maxAttempts = 12;
+        $lockoutSeconds = 60;
 
-        // ✅ Check if the user is permanently blocked
         if (RateLimiter::attempts($throttleKey) >= $maxAttempts) {
             return response()->json([
                 'error' => 'You have been permanently blocked due to too many failed login attempts.'
-            ], Response::HTTP_FORBIDDEN); // 403 Forbidden
+            ], Response::HTTP_FORBIDDEN);
         }
 
-        // ✅ Check if the user is temporarily blocked (rate limit exceeded)
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
             return response()->json([
                 'error' => 'Too many login attempts. Please try again in ' . RateLimiter::availableIn($throttleKey) . ' seconds.'
-            ], Response::HTTP_TOO_MANY_REQUESTS); // 429 Too Many Requests
+            ], Response::HTTP_TOO_MANY_REQUESTS);
         }
 
         $user = User::where('username', $request->username)->first();
@@ -123,7 +124,6 @@ class AuthController extends Controller
             ]);
         }
 
-        // ✅ Reset throttle count on successful login
         RateLimiter::clear($throttleKey);
 
         if ($user->is_mfa_enabled) {
@@ -135,13 +135,41 @@ class AuthController extends Controller
 
         $token = $user->createToken('API Token')->plainTextToken;
 
+        // 🔥 GET EMPLOYEE PERMISSIONS
+        $permissions = [];
+
+        if (strtolower($user->role) === 'employee') {
+            $accessRecords = EmployeeAccess::where('user_id', $user->id)->get();
+
+            $permissions = []; // reset just to be sure
+
+            foreach ($accessRecords as $access) {
+                if (is_array($access->permissions)) {
+                    // merge permissions arrays from each record
+                    $permissions = array_merge($permissions, $access->permissions);
+                }
+            }
+
+            // Optional: remove duplicates and capitalize permission names if needed
+            $permissions = array_unique($permissions);
+            $permissions = array_map(fn($p) => ucfirst($p), $permissions);
+        }
+
+
+
         return response()->json([
             'message' => 'Login successful!',
             'token' => $token,
-            'user' => $user
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'username' => $user->username,
+                'role' => $user->role,
+                'permissions' => $permissions,
+            ],
         ]);
-        Log::info('Login attempts: ' . RateLimiter::attempts($throttleKey));
     }
+
 
     // Verify MFA token
     public function verifyMfa(Request $request)
@@ -179,8 +207,7 @@ class AuthController extends Controller
         if ($request->user()) {
             $request->user()->tokens()->delete();
         }
-    
+
         return response()->json(['message' => 'Logged out successfully']);
     }
-    
 }
