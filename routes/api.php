@@ -18,6 +18,7 @@ use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\DispatchController;
+use App\Http\Controllers\CompanyController;
 use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 
@@ -80,6 +81,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Dispatches
     Route::apiResource('/dispatch', DispatchController::class);
+
+    //Companies
+    Route::apiResource('/company', CompanyController::class);
 
     //Logout
     Route::post('/logout', [AuthController::class, 'logout']);
