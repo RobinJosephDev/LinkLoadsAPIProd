@@ -21,24 +21,22 @@ return new class extends Migration {
             $table->string('state')->nullable();
             $table->string('country')->nullable();
             $table->string('postal')->nullable();
-
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
             $table->string('cell')->nullable();
             $table->string('fax')->nullable();
-
             $table->string('invoice_prefix')->nullable();
             $table->string('SCAC')->nullable();
             $table->string('docket_no')->nullable();
             $table->string('carrier_code')->nullable();
-
             $table->string('gst_hst_no')->nullable();
             $table->string('qst_no')->nullable();
             $table->string('ca_bond_no')->nullable();
+            $table->boolean('obsolete')->default(false);
+
             $table->string('us_tax_id')->nullable();
             $table->string('payroll_no')->nullable();
             $table->string('wcb_no')->nullable();
-
             $table->string('dispatch_email')->nullable();
             $table->string('ap_email')->nullable();
             $table->string('ar_email')->nullable();
@@ -51,8 +49,6 @@ return new class extends Migration {
 
             $table->string('company_package')->nullable();
             $table->string('insurance')->nullable();
-
-            $table->boolean('obsolete')->default(false);
 
             $table->timestamps();
         });
