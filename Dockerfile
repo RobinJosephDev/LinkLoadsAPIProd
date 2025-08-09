@@ -18,7 +18,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /app
 
-# Copy everything
+# Copy application files
 COPY . .
 
 # Install PHP dependencies
@@ -27,11 +27,15 @@ RUN composer install --no-dev --optimize-autoloader
 # Install and build React (if needed)
 RUN npm install && npm run build
 
-# Cache Laravel config
-RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
-
 # Expose port
 EXPOSE 10000
 
-# Start Laravel
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=10000"]
+# Start Laravel after clearing and caching config at runtime
+CMD php artisan config:clear \
+    && php artisan route:clear \
+    && php artisan view:clear \
+    && php artisan cache:clear \
+    && php artisan config:cache \
+    && php artisan route:cache \
+    && php artisan view:cache \
+    && php artisan serve --host=0.0.0.0 --port=10000
