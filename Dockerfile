@@ -25,8 +25,7 @@ COPY . .
 RUN composer install --no-dev --optimize-autoloader
 
 # Install and build React (if needed)
-RUN cd frontend && npm install && npm run build && cd .. && \
-    cp -r frontend/build/* public/
+RUN npm install && npm run build
 
 # Cache Laravel config
 RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
