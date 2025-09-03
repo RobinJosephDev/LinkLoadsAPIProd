@@ -17,9 +17,17 @@ class CustomerController extends Controller
         $this->customer = new Customer();
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json($this->customer->orderBy('created_at', 'desc')->get());
+        $user = $request->user(); // Authenticated user from Sanctum
+
+        if ($user->role === 'admin' || $user->role === 'carrier') {
+            // Admins & carriers can see all customers
+            $customers = $this->customer->orderBy('created_at', 'desc')->get();
+            return response()->json($customers);
+        }
+
+        return response()->json(['message' => 'Forbidden'], 403);
     }
 
     public function store(Request $request)
