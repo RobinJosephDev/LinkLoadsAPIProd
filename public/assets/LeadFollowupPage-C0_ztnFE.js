@@ -1,0 +1,1 @@
+import{j as o}from"./index-DsiLbZ9r.js";import{L as r}from"./LeadFollowupTable-CpouuiR3.js";import"./Modal-Dy5-4all.js";import"./EyeOutlined-B8J0i9Xp.js";import"./Pagination-rW2CcH_q.js";import"./purify.es-Ci5xwkH_.js";/* empty css             */import"./useGoogleAutocomplete--4rnTPXT.js";const d=()=>o.jsx("div",{children:o.jsx(r,{})});export{d as default};
