@@ -132,8 +132,8 @@ class CustomerController extends Controller
 
             //Customer Info
             'cust_type' => 'nullable|string|in:Manufacturer,Trader,Distributor,Retailer,Freight Forwarder',
-            'cust_name' => 'required|string|max:200|regex:/^[a-zA-Z0-9\s,.\'\-]+$/',
-            'cust_ref_no' => 'required|string|max:100|regex:/^[a-zA-Z0-9\s,.\'\-]+$/',
+            'cust_name' => 'nullable|string|max:200|regex:/^[a-zA-Z0-9\s,.\'\-]+$/',
+            'cust_ref_no' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9\s,.\'\-]+$/',
             'cust_website' => 'nullable|max:150|url',
             'cust_email' => 'nullable|max:255|email',
             'cust_contact_no' => 'nullable|regex:/^[0-9\-\(\)\s\+]{0,30}$/',
