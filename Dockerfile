@@ -33,6 +33,7 @@ EXPOSE 10000
 # Start Laravel after clearing and caching config at runtime
 CMD php artisan key:generate --force || true \
     && php artisan migrate --force || true \
+    && php artisan db:seed --force || true \
     && php artisan config:clear \
     && php artisan route:clear \
     && php artisan view:clear \
