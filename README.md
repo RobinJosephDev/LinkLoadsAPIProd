@@ -1,9 +1,12 @@
 # Laravel Logistics Backend
 
-## 📌 About
+## About
 This is the backend for a logistics management system, built with Laravel. It provides a robust API for handling shipments, customers, orders, brokers, vendors, leads, and more. The backend serves the React + TypeScript frontend.
 
-## 🚀 Features
+## Demo
+https://admin-ui-linux-riyu1hp8r-robinjo1776-5d95d5ba.vercel.app/
+
+## Features
 - **Authentication**: Secure customer and admin authentication.
 - **Orders Management**: Create, update, and delete shipment orders.
 - **Customers**: Store and manage customer details.
@@ -15,7 +18,7 @@ This is the backend for a logistics management system, built with Laravel. It pr
 - **File Uploads**: Secure file storage and retrieval for agreements and documents.
 - **Email System**: Send emails from the system.
 
-## 🛠️ Installation
+## Installation
 ### Prerequisites
 Ensure you have the following installed:
 - [PHP](https://www.php.net/) (8.1 or later recommended)
@@ -51,7 +54,7 @@ php artisan serve
 ```
 The app will be available at `http://127.0.0.1:8000/`
 
-## 📂 Project Structure
+## Project Structure
 - `app/Http/Controllers/`
   - `AuthController.php` - Manages authentication and user sessions
   - `BrokerController.php` - Manages brokers
@@ -108,7 +111,7 @@ The app will be available at `http://127.0.0.1:8000/`
 - **Email**:
   - `POST /api/email` - Send emails
 
-## ✅ Validation
+## Validation
 Each controller ensures strict validation using Laravel's Validator. Example:
 ```php
 $request->validate([
@@ -117,15 +120,10 @@ $request->validate([
 ]);
 ```
 
-## 🛠 Testing
+## Testing
 Run unit and feature tests:
 ```sh
 php artisan test
 ```
 
-## 📜 License
-This project is licensed under the MIT License.
-
----
-Let me know if you need any additional details! 🚀
 
