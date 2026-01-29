@@ -7,7 +7,7 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        'admin-ui-linux-riyu1hp8r-robinjo1776-5d95d5ba.vercel.app',
+        'https://admin-ui-linux-riyu1hp8r-robinjo1776-5d95d5ba.vercel.app',
     ],
 
     'allowed_origins_patterns' => [],
